@@ -1,0 +1,27 @@
+engines:
+  pep8:
+    enabled: true
+    checks:
+      E501:
+        enabled: false
+
+  radon: 
+    enabled: true
+    config: 
+      python_version: "2"
+  
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - python:
+
+ratings:
+   paths:
+   - "**.py"
+
+exclude_paths:
+- "Procfile"
+- "*.md"
+- "*.txt"
+- "*.yml"
