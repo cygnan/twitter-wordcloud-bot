@@ -6,8 +6,8 @@ import logging
 import tweepy
 
 logging.basicConfig()
-log = logging.getLogger("main.py")
-log.setLevel(logging.DEBUG)
+logger = logging.getLogger("main.py")
+logger.setLevel(logging.DEBUG)
 
 CONSUMER_KEY = os.environ["CONSUMER_KEY"]
 CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
@@ -25,24 +25,24 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_to = str(status.in_reply_to_screen_name)
             tweet_text = str(status.text.encode('utf_8'))
 
-            log.info('@{}: "{}"'.format(tweet_to, tweet_text))
+            logger.info('@{}: "{}"'.format(tweet_to, tweet_text))
 
             if tweet_to == str(api.me().screen_name):
                 my_reply = "@" + tweet_username + " " + tweet_text #Test
 
                 api.update_status(status=my_reply)
 
-                log.info('-> Tweeted "{}"'.format(my_reply))
+                logger.info('-> Tweeted "{}"'.format(my_reply))
             else:
-                log.info("-> Skipped.")
+                logger.info("-> Skipped.")
             return
 
         except Exception as e:
-            log.warning(e)
+            logger.warning(e)
 
     def on_error(self, status_code):
-        log.warning("Error")
-        log.error(status_code)
+        logger.warning("Error")
+        logger.error(status_code)
 
 try:
     print("Hello @{}!".format(api.me().screen_name))
@@ -50,11 +50,11 @@ try:
     my_stream_listener = MyStreamListener()
     my_stream = tweepy.Stream(auth=api.auth, listener=my_stream_listener)
 
-    log.info("Started streaming...")
+    logger.info("Started streaming...")
 
     my_stream.userstream()
 
-    log.info("Finished streaming.")
+    logger.info("Finished streaming.")
 
 except Exception as e:
-    log.warning(e)
+    logger.warning(e)
