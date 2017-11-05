@@ -7,26 +7,19 @@ import sys
 import tweepy
 
 logging.basicConfig()
-logger = logging.getLogger("main.py")
-logger.setLevel(logging.DEBUG)
+LOGGER = logging.getLogger("main.py")
+LOGGER.setLevel(logging.DEBUG)
 
 CONSUMER_KEY = os.environ["CONSUMER_KEY"]
 CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
-is_travis = False
-
-logger.info("sys.argv: {}".format(sys.argv))
-logger.info("len(sys.argv): {}".format(len(sys.argv)))
-
 if len(sys.argv) == 2 and str(sys.argv[1]) == "--travis":
-    logger.info("Started Travis CI building test...")
-    is_travis = True
+    IS_TRAVIS_CI = True
+else:
+    IS_TRAVIS_CI = False
 
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
@@ -34,46 +27,55 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_username = str(status.user.screen_name)
             tweet_text = str(status.text.encode('utf_8'))
 
-            logger.info('@{}: "{}"'.format(tweet_username, tweet_text))
+            LOGGER.info('@{0}: "{1}"'.format(tweet_username, tweet_text))
 
             if status.in_reply_to_screen_name is None:
-                logger.info("-> Skipped.")
+                LOGGER.info("-> Skipped.")
             else:
                 tweet_to = str(status.in_reply_to_screen_name)
 
-                if tweet_to != str(api.me().screen_name):
-                    logger.info("-> Skipped.")
+                if tweet_to != MY_TWITTER_USERNAME:
+                    LOGGER.info("-> Skipped.")
                 else:
                     my_reply = "@" + tweet_username + " " + tweet_text  # Test
 
-                    api.update_status(status=my_reply)
+                    API.update_status(status=my_reply)
 
-                    logger.info('-> Tweeted "{}"'.format(my_reply))
+                    LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
 
             return
 
         except Exception as e:
-            logger.warning(e)
+            LOGGER.warning(e)
 
     def on_error(self, status_code):
-        logger.warning("Error")
-        logger.error(status_code)
+        LOGGER.warning("Error")
+        LOGGER.error(status_code)
 
 
-logger.info("Hello @{}!".format(api.me().screen_name))
+if IS_TRAVIS_CI is True:
+    LOGGER.info("Started Travis CI building test...")
 
-my_stream_listener = MyStreamListener()
-my_stream = tweepy.Stream(auth=api.auth, listener=my_stream_listener)
+AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+API = tweepy.API(AUTH)
 
-if is_travis is True:
+LOGGER.info("Authentication successful.")
+
+MY_TWITTER_USERNAME = str(API.me().screen_name)
+LOGGER.info("Hello @{0}!".format(MY_TWITTER_USERNAME))
+
+if IS_TRAVIS_CI is True:
     sys.exit()
 
 try:
-    logger.info("Started streaming...")
+    MY_STREAM = tweepy.Stream(auth=API.auth, listener=MyStreamListener())
 
-    my_stream.userstream()
+    LOGGER.info("Started streaming...")
 
-    logger.info("Finished streaming.")
+    MY_STREAM.userstream()
+
+    LOGGER.info("Finished streaming.")
 
 except Exception as e:
-    logger.warning(e)
+    LOGGER.warning(e)
