@@ -36,7 +36,7 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_to = str(status.in_reply_to_screen_name)
             tweet_text = str(status.text.encode('utf_8'))
 
-            logger.info('@{}: "{}"'.format(tweet_to, tweet_text))
+            logger.info('@{}: "{}"'.format(tweet_username, tweet_text))
 
             if tweet_to == str(api.me().screen_name):
                 my_reply = "@" + tweet_username + " " + tweet_text  # Test
