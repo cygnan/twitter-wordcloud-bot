@@ -14,6 +14,7 @@ CONSUMER_KEY = os.environ["CONSUMER_KEY"]
 CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
+
 is_travis = False
 
 logger.info("sys.argv: {}".format(sys.argv))
@@ -28,24 +29,27 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 class MyStreamListener(tweepy.StreamListener):
-
-
     def on_status(self, status):
         try:
             tweet_username = str(status.user.screen_name)
-            tweet_to = str(status.in_reply_to_screen_name)
             tweet_text = str(status.text.encode('utf_8'))
 
             logger.info('@{}: "{}"'.format(tweet_username, tweet_text))
 
-            if tweet_to == str(api.me().screen_name):
-                my_reply = "@" + tweet_username + " " + tweet_text  # Test
-
-                api.update_status(status=my_reply)
-
-                logger.info('-> Tweeted "{}"'.format(my_reply))
-            else:
+            if status.in_reply_to_screen_name is None:
                 logger.info("-> Skipped.")
+            else:
+                tweet_to = str(status.in_reply_to_screen_name)
+
+                if tweet_to != str(api.me().screen_name):
+                    logger.info("-> Skipped.")
+                else:
+                    my_reply = "@" + tweet_username + " " + tweet_text  # Test
+
+                    api.update_status(status=my_reply)
+
+                    logger.info('-> Tweeted "{}"'.format(my_reply))
+
             return
 
         except Exception as e:
