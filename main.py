@@ -29,12 +29,14 @@ class MyStreamListener(tweepy.StreamListener):
 
             LOGGER.info('@{0}: "{1}"'.format(tweet_username, tweet_text))
 
-            if status.in_reply_to_screen_name is None:
+            is_not_reply = status.in_reply_to_screen_name is None
+            if is_not_reply:
                 LOGGER.info("-> Skipped.")
             else:
                 tweet_to = str(status.in_reply_to_screen_name)
 
-                if tweet_to != MY_TWITTER_USERNAME:
+                is_not_reply_to_me = tweet_to != MY_TWITTER_USERNAME
+                if is_not_reply_to_me:
                     LOGGER.info("-> Skipped.")
                 else:
                     my_reply = "@" + tweet_username + " " + tweet_text  # Test
