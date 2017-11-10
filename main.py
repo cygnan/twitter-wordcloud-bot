@@ -84,10 +84,10 @@ class MyStreamListener(tweepy.StreamListener):
                     word_type = node.feature.split(",")[0]
                     if word_type == "形容詞":
                       word = node.surface
+                      frequency[word] += 100
+                    elif word_type in ["動詞", "名詞", "副詞"]:
+                      word = node.surface
                       frequency[word] += 1
-                    # elif word_type in ["動詞", "名詞", "副詞"]:
-                    #   word = node.surface
-                    #   frequency[word] += 1
 
               word_list = " ".join(frequency).decode('utf-8')
 
