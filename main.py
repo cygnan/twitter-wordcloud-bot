@@ -78,13 +78,18 @@ class MyStreamListener(tweepy.StreamListener):
               #               u'した',  u'思う', u'それ', u'ここ', u'ちゃん',
               #               u'くん', u'', u'て', u'に', u'を', u'は', u'の',
               #               u'が', u'と', u'た', u'し', u'で', u'ない', u'も',
-              #               u'な', u'い', u'か', u'ので', u'よう', u'']
+              #               u'な', u'い', u'か', u'ので', u'よう', u'', u'RT']
               stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                             'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
                             'くださる', 'そう', 'せる', 'した',  '思う', 'それ',
                             'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
                             'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                            'も', 'な', 'い', 'か', 'ので', 'よう', '']
+                            'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT']
+
+              with MeCab() as nm:
+                for node in nm.parse(query, as_nodes=True):
+                  word = node.surface
+                  stop_words.append(word)
 
               LOGGER.info("Doing morphological analysis using MeCab...")
 
@@ -107,7 +112,7 @@ class MyStreamListener(tweepy.StreamListener):
                         frequency[word_decoded] += 1
 
               LOGGER.info("Done.")
-              
+
               font_path = "GenShinGothic-P-Normal.ttf"
 
               # wordcloud = WordCloud(background_color="white", width=900,
