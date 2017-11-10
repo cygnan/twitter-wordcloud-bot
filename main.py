@@ -9,10 +9,6 @@ import tweepy
 from wordcloud import WordCloud
 from natto import MeCab
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
 LOGGER = logging.getLogger("main.py")
 LOGGER.setLevel(logging.DEBUG)
@@ -110,14 +106,9 @@ class MyStreamListener(tweepy.StreamListener):
                                     height=450, font_path=fpath,
                                     stopwords=set(stop_words)).generate(word_list)
 
-              plt.figure(figsize=(15, 12))
-              plt.imshow(wordcloud)
-
               file_path = "/tmp/{0}.png".format(str(tweet_id))
               wordcloud.to_file(file_path)
-              LOGGER.info('Saved an wordcloud image to "{0}"'.format(file_path))
-              # plt.axis("off")
-              # plt.show()
+              LOGGER.info('Saved a wordcloud image to "{0}"'.format(file_path))
 
               my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
                   tweet_username, query, str(len(searched_tweets)))  # Test
