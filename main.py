@@ -60,7 +60,7 @@ class MyStreamListener(tweepy.StreamListener):
             frequency = defaultdict(int)
 
             LOGGER.info('Searching "{0}"'.format(query))
-            search_result = API.search(q=query_encoded)
+            search_result = API.search(q=query_encoded, rpp=100)
             LOGGER.info('-> {0} tweets found.'.format(str(len(search_result))))
 
             for tweet in search_result:
