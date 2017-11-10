@@ -13,7 +13,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-logging.basicConfig()
+logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
 LOGGER = logging.getLogger("main.py")
 LOGGER.setLevel(logging.DEBUG)
 
