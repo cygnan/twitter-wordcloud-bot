@@ -72,8 +72,6 @@ class MyStreamListener(tweepy.StreamListener):
 
               LOGGER.info('-> Tweeted "%s"', my_reply)
             else:
-              LOGGER.info("Generating a wordcloud image...")
-
               # stop_words = [u'てる', u'いる', u'なる', u'れる', u'する', 
               #               u'ある', u'こと', u'これ', u'さん', u'して', 
               #               u'くれる', u'やる', u'くださる', u'そう', u'せる',
@@ -87,6 +85,8 @@ class MyStreamListener(tweepy.StreamListener):
                             'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
                             'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
                             'も', 'な', 'い', 'か', 'ので', 'よう', '']
+
+              LOGGER.info("Doing morphological analysis using MeCab...")
 
               for tweet in searched_tweets:
                 text = str(tweet.text.encode("utf-8"))
@@ -106,6 +106,8 @@ class MyStreamListener(tweepy.StreamListener):
                         word_decoded = word.decode('utf-8')
                         frequency[word_decoded] += 1
 
+              LOGGER.info("Done.")
+              
               font_path = "GenShinGothic-P-Normal.ttf"
 
               # wordcloud = WordCloud(background_color="white", width=900,
@@ -113,6 +115,8 @@ class MyStreamListener(tweepy.StreamListener):
               #                       stopwords=set(stop_words_decoded))
               wordcloud = WordCloud(background_color="white", width=900,
                                     height=450, font_path=font_path)
+
+              LOGGER.info("Generating a wordcloud image...")
 
               wordcloud_image = wordcloud.generate_from_frequencies(
                   frequencies=frequency)
