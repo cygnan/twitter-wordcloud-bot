@@ -58,12 +58,12 @@ class MyStreamListener(tweepy.StreamListener):
             from collections import defaultdict
             frequency = defaultdict(int)
 
-            LOGGER.info('Searching "{0}"'.format(query))
+            LOGGER.info('Searching "{0}"...'.format(query))
             MAX_TWEETS = 1000
             searched_tweets = [status for status in tweepy.Cursor(
                 API.search, q=query_encoded).items(MAX_TWEETS)]
             LOGGER.info(
-                '-> {0} tweets found.'.format(str(len(searched_tweets))))
+                '-> {0} tweets were found.'.format(str(len(searched_tweets))))
 
             no_hit = len(searched_tweets) == 0
             if no_hit:
@@ -73,6 +73,8 @@ class MyStreamListener(tweepy.StreamListener):
 
               LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
             else:
+              LOGGER.info("Generating a wordcloud image...")
+
               for tweet in searched_tweets:
                 text = str(tweet.text.encode("utf-8"))
                 # filter(tweet.text.encode("utf-8"))
@@ -82,7 +84,7 @@ class MyStreamListener(tweepy.StreamListener):
                     word_type = node.feature.split(",")[0]
                     if word_type == "形容詞":
                       word = node.surface
-                      frequency[word] += 5
+                      frequency[word] += 1
                     elif word_type in ["動詞", "名詞", "副詞"]:
                       word = node.surface
                       frequency[word] += 1
