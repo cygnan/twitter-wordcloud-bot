@@ -4,6 +4,7 @@
 import os
 import logging
 import sys
+import time
 import urllib
 import tweepy
 from wordcloud import WordCloud
@@ -19,8 +20,13 @@ LOGGER.setLevel(logging.DEBUG)
 
 CONSUMER_KEY = os.environ["CONSUMER_KEY"]
 CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
-ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
+
+ACCESS_TOKEN = [
+  os.environ["ACCESS_TOKEN"],
+]
+ACCESS_TOKEN_SECRET = [
+  os.environ["ACCESS_TOKEN_SECRET"]
+]
 
 if len(sys.argv) == 2 and str(sys.argv[1]) == "--travis":
   IS_TRAVIS_CI = True
@@ -58,17 +64,29 @@ class MyStreamListener(tweepy.StreamListener):
             from collections import defaultdict
             frequency = defaultdict(int)
 
-            LOGGER.info('Searching "%s"...', query)
             MAX_TWEETS = 1000
-            searched_tweets = [status for status in tweepy.Cursor(
-                API.search, q=query_encoded).items(MAX_TWEETS)]
+
+            while True:
+              try:
+                LOGGER.info('Searching "%s"...', query)
+                searched_tweets = [status for status in tweepy.Cursor(
+                    api.search, q=query_encoded).items(MAX_TWEETS)]
+                break
+              except Exception as e:
+                is_429_too_many_requests_error = str(e).find("429") != -1
+                if is_429_too_many_requests_error:
+                  LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
+                  time.sleep(60)
+                else:
+                  raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
+            
             LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
             no_hit = len(searched_tweets) == 0
             if no_hit:
               my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
-              API.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
+              api.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
 
               LOGGER.info('-> Tweeted "%s"', my_reply)
             else:
@@ -141,7 +159,7 @@ class MyStreamListener(tweepy.StreamListener):
               my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
                   tweet_username, query, str(len(searched_tweets)))  # Test
 
-              API.update_with_media(filename=file_path, status=my_reply,
+              api.update_with_media(filename=file_path, status=my_reply,
                                     in_reply_to_status_id=tweet_id)
 
               LOGGER.info('-> Tweeted "%s"',my_reply)
@@ -155,23 +173,28 @@ class MyStreamListener(tweepy.StreamListener):
     LOGGER.error(status_code)
 
 
+def certify():
+  auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+  auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+  api = tweepy.API(auth)
+  return api
+
+
 if IS_TRAVIS_CI is True:
   LOGGER.info("Started Travis CI building test...")
 
-AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-API = tweepy.API(AUTH)
+api = certify()
 
 LOGGER.info("Authentication successful.")
 
-MY_TWITTER_USERNAME = str(API.me().screen_name)
+MY_TWITTER_USERNAME = str(api.me().screen_name)
 LOGGER.info("Hello @%s!",MY_TWITTER_USERNAME)
 
 if IS_TRAVIS_CI is True:
   sys.exit()
 
 try:
-  MY_STREAM = tweepy.Stream(auth=API.auth, listener=MyStreamListener())
+  MY_STREAM = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
 
   LOGGER.info("Started streaming...")
 
