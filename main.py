@@ -20,13 +20,8 @@ LOGGER.setLevel(logging.DEBUG)
 
 CONSUMER_KEY = os.environ["CONSUMER_KEY"]
 CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
-
-ACCESS_TOKEN = [
-  os.environ["ACCESS_TOKEN"],
-]
-ACCESS_TOKEN_SECRET = [
-  os.environ["ACCESS_TOKEN_SECRET"]
-]
+ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
 if len(sys.argv) == 2 and str(sys.argv[1]) == "--travis":
   IS_TRAVIS_CI = True
