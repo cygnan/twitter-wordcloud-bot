@@ -63,53 +63,61 @@ class MyStreamListener(tweepy.StreamListener):
             search_result = API.search(q=query_encoded, rpp=100)
             LOGGER.info('-> {0} tweets found.'.format(str(len(search_result))))
 
-            for tweet in search_result:
-              text = str(tweet.text.encode("utf-8"))
-              # filter(tweet.text.encode("utf-8"))
+            no_hit = len(search_result) == 0
+            if no_hit:
+              my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
-              with MeCab() as nm:
-                for node in nm.parse(text, as_nodes=True):
-                  word_type = node.feature.split(",")[0]
-                  if word_type in ["形容詞", "動詞", "名詞", "副詞"]:
-                    word = node.surface
-                    frequency[word] += 1
-              
-            word_list = " ".join(frequency).decode('utf-8')
+              API.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
 
-            fpath = "GenShinGothic-P-Normal.ttf"
+              LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+            else:
+              for tweet in search_result:
+                text = str(tweet.text.encode("utf-8"))
+                # filter(tweet.text.encode("utf-8"))
 
-            # stop_words = [ u'てる', u'いる', u'なる', u'れる', u'する', u'ある', u'こと',\
-            #        u'これ', u'さん', u'して', u'くれる', u'やる', u'くださる',\
-            #        u'そう', u'せる', u'した',  u'思う', u'それ', u'ここ', u'ちゃん',\
-            #        u'くん', u'', u'て',u'に',u'を',u'は',u'の', u'が', u'と', u'た',\
-            #        u'し', u'で', u'ない', u'も', u'な', u'い', u'か', u'ので',\
-            #        u'よう', u'']
-            stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと',
-                  'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
-                  'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
-                  'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
-                  'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
-                  'よう', '']
+                with MeCab() as nm:
+                  for node in nm.parse(text, as_nodes=True):
+                    word_type = node.feature.split(",")[0]
+                    if word_type in ["形容詞", "動詞", "名詞", "副詞"]:
+                      word = node.surface
+                      frequency[word] += 1
+                
+              word_list = " ".join(frequency).decode('utf-8')
 
-            wordcloud = WordCloud(background_color="white", width=900, 
-                                  height=450, font_path=fpath, 
-                                  stopwords=set(stop_words)).generate(word_list)
+              fpath = "GenShinGothic-P-Normal.ttf"
 
-            plt.figure(figsize=(15, 12))
-            plt.imshow(wordcloud)
+              # stop_words = [ u'てる', u'いる', u'なる', u'れる', u'する', u'ある', u'こと',\
+              #        u'これ', u'さん', u'して', u'くれる', u'やる', u'くださる',\
+              #        u'そう', u'せる', u'した',  u'思う', u'それ', u'ここ', u'ちゃん',\
+              #        u'くん', u'', u'て',u'に',u'を',u'は',u'の', u'が', u'と', u'た',\
+              #        u'し', u'で', u'ない', u'も', u'な', u'い', u'か', u'ので',\
+              #        u'よう', u'']
+              stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと',
+                    'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
+                    'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
+                    'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
+                    'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
+                    'よう', '']
 
-            file_path = "/tmp/{0}.png".format(str(tweet_id))
-            wordcloud.to_file(file_path)
-            LOGGER.info('Saved an wordcloud image to "{0}"'.format(file_path))
-            # plt.axis("off")
-            # plt.show()
+              wordcloud = WordCloud(background_color="white", width=900, 
+                                    height=450, font_path=fpath, 
+                                    stopwords=set(stop_words)).generate(word_list)
 
-            my_reply = "@{0} 「{1}」の検索結果".format(tweet_username, query) # Test
+              plt.figure(figsize=(15, 12))
+              plt.imshow(wordcloud)
 
-            API.update_with_media(filename=file_path, status=my_reply,
-                                  in_reply_to_status_id=tweet_id)
+              file_path = "/tmp/{0}.png".format(str(tweet_id))
+              wordcloud.to_file(file_path)
+              LOGGER.info('Saved an wordcloud image to "{0}"'.format(file_path))
+              # plt.axis("off")
+              # plt.show()
 
-            LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+              my_reply = "@{0} 「{1}」の検索結果".format(tweet_username, query) # Test
+
+              API.update_with_media(filename=file_path, status=my_reply,
+                                    in_reply_to_status_id=tweet_id)
+
+              LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
 
       return
 
