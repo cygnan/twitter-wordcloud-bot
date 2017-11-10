@@ -119,7 +119,8 @@ class MyStreamListener(tweepy.StreamListener):
               # plt.axis("off")
               # plt.show()
 
-              my_reply = "@{0} 「{1}」の検索結果".format(tweet_username, query) # Test
+              my_reply = "@{0} Search results for {1} (about {2} tweets)".format(
+                  tweet_username, query, len(searched_tweets))  # Test
 
               API.update_with_media(filename=file_path, status=my_reply,
                                     in_reply_to_status_id=tweet_id)
