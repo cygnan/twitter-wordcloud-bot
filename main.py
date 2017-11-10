@@ -41,7 +41,7 @@ class MyStreamListener(tweepy.StreamListener):
       if is_retweet:
         LOGGER.info("-> Skipped (is_retweet).")
       else:
-        is_not_reply = status.in_reply_to_screen_name is None
+        is_not_reply = status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text
         if is_not_reply:
           LOGGER.info("-> Skipped (is_not_reply).")
         else:
@@ -52,9 +52,8 @@ class MyStreamListener(tweepy.StreamListener):
           if is_not_reply_to_me:
             LOGGER.info("-> Skipped (is_not_reply_to_me).")
           else:
-            if "@" in tweet_text and " " in tweet_text:
-              query = tweet_text.split(" ", tweet_text.count("@"))[-1]
-              query_encoded = urllib.quote_plus(query)
+            query = tweet_text.split(" ", tweet_text.count("@"))[-1]
+            query_encoded = urllib.quote_plus(query)
 
             from collections import defaultdict
             frequency = defaultdict(int)
@@ -84,7 +83,7 @@ class MyStreamListener(tweepy.StreamListener):
                     if word_type in ["形容詞", "動詞", "名詞", "副詞"]:
                       word = node.surface
                       frequency[word] += 1
-                
+
               word_list = " ".join(frequency).decode('utf-8')
 
               fpath = "GenShinGothic-P-Normal.ttf"
@@ -96,14 +95,14 @@ class MyStreamListener(tweepy.StreamListener):
               #        u'し', u'で', u'ない', u'も', u'な', u'い', u'か', u'ので',\
               #        u'よう', u'']
               stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと',
-                    'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
-                    'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
-                    'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
-                    'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
-                    'よう', '']
+                'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
+                'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
+                'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
+                'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
+                'よう', '']
 
-              wordcloud = WordCloud(background_color="white", width=900, 
-                                    height=450, font_path=fpath, 
+              wordcloud = WordCloud(background_color="white", width=900,
+                                    height=450, font_path=fpath,
                                     stopwords=set(stop_words)).generate(word_list)
 
               plt.figure(figsize=(15, 12))
