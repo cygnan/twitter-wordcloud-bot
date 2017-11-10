@@ -60,7 +60,9 @@ class MyStreamListener(tweepy.StreamListener):
             frequency = defaultdict(int)
 
             LOGGER.info('Searching "{0}"'.format(query))
-            search_result = API.search(q=query_encoded, rpp=100)
+            MAX_TWEETS = 1000
+            searched_tweets = [status for status in tweepy.Cursor(
+                API.search, q=query_encoded).items(MAX_TWEETS)]
             LOGGER.info('-> {0} tweets found.'.format(str(len(search_result))))
 
             no_hit = len(search_result) == 0
