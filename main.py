@@ -74,40 +74,46 @@ class MyStreamListener(tweepy.StreamListener):
             else:
               LOGGER.info("Generating a wordcloud image...")
 
+              # stop_words = [u'てる', u'いる', u'なる', u'れる', u'する', 
+              #               u'ある', u'こと', u'これ', u'さん', u'して', 
+              #               u'くれる', u'やる', u'くださる', u'そう', u'せる',
+              #               u'した',  u'思う', u'それ', u'ここ', u'ちゃん',
+              #               u'くん', u'', u'て', u'に', u'を', u'は', u'の',
+              #               u'が', u'と', u'た', u'し', u'で', u'ない', u'も',
+              #               u'な', u'い', u'か', u'ので', u'よう', u'']
+              stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
+                            'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
+                            'くださる', 'そう', 'せる', 'した',  '思う', 'それ',
+                            'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
+                            'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
+                            'も', 'な', 'い', 'か', 'ので', 'よう', '']
+
               for tweet in searched_tweets:
                 text = str(tweet.text.encode("utf-8"))
                 # filter(tweet.text.encode("utf-8"))
 
                 with MeCab() as nm:
                   for node in nm.parse(text, as_nodes=True):
-                    word_type = node.feature.split(",")[0]
-                    if word_type == "形容詞":
-                      word = node.surface.decode('utf-8')
-                      frequency[word] += 10
-                    elif word_type in ["動詞", "名詞", "副詞"]:
-                      word = node.surface.decode('utf-8')
-                      frequency[word] += 1
+                    word = node.surface
+
+                    is_not_stop_word = word not in stop_words
+                    if is_not_stop_word:
+                      word_type = node.feature.split(",")[0]
+                      if word_type == "形容詞":
+                        word_decoded = word.decode('utf-8')
+                        frequency[word_decoded] += 10
+                      elif word_type in ["動詞", "名詞", "副詞"]:
+                        word_decoded = word.decode('utf-8')
+                        frequency[word_decoded] += 1
 
               font_path = "GenShinGothic-P-Normal.ttf"
 
-              # stop_words = [ u'てる', u'いる', u'なる', u'れる', u'する', u'ある', u'こと',\
-              #        u'これ', u'さん', u'して', u'くれる', u'やる', u'くださる',\
-              #        u'そう', u'せる', u'した',  u'思う', u'それ', u'ここ', u'ちゃん',\
-              #        u'くん', u'', u'て',u'に',u'を',u'は',u'の', u'が', u'と', u'た',\
-              #        u'し', u'で', u'ない', u'も', u'な', u'い', u'か', u'ので',\
-              #        u'よう', u'']
-              stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと',
-                'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
-                'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
-                'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
-                'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
-                            'よう', '']
-                            
-              stop_words_decoded = [x.decode('utf-8') for x in stop_words]
-
+              # wordcloud = WordCloud(background_color="white", width=900,
+              #                       height=450, font_path=font_path,
+              #                       stopwords=set(stop_words_decoded))
               wordcloud = WordCloud(background_color="white", width=900,
-                                    height=450, font_path=font_path,
-                                    stopwords=set(stop_words_decoded))
+                                    height=450, font_path=font_path)
+
               wordcloud_image = wordcloud.generate_from_frequencies(
                   frequencies=frequency)
 
