@@ -159,15 +159,15 @@ class MyStreamListener(tweepy.StreamListener):
                                       in_reply_to_status_id=tweet_id)
 
                 LOGGER.info('-> Tweeted "%s"',my_reply)
-              except Exception as e:
-                LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+            except Exception as e:
+              LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
-                my_reply = "500 Internal Server Error. Sorry, something went wrong."
+              my_reply = "500 Internal Server Error. Sorry, something went wrong."
 
-                api.update_status(
-                    status=my_reply, in_reply_to_status_id=tweet_id)
+              api.update_status(
+                  status=my_reply, in_reply_to_status_id=tweet_id)
 
-                LOGGER.info('-> Tweeted "%s"', my_reply)
+              LOGGER.info('-> Tweeted "%s"', my_reply)
       return
 
     except Exception as e:
