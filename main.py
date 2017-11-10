@@ -88,9 +88,7 @@ class MyStreamListener(tweepy.StreamListener):
                       word = node.surface
                       frequency[word] += 1
 
-              word_list = " ".join(frequency).decode('utf-8')
-
-              fpath = "GenShinGothic-P-Normal.ttf"
+              font_path = "GenShinGothic-P-Normal.ttf"
 
               # stop_words = [ u'てる', u'いる', u'なる', u'れる', u'する', u'ある', u'こと',\
               #        u'これ', u'さん', u'して', u'くれる', u'やる', u'くださる',\
@@ -106,7 +104,7 @@ class MyStreamListener(tweepy.StreamListener):
                 'よう', '']
 
               wordcloud = WordCloud(background_color="white", width=900,
-                                    height=450, font_path=fpath,
+                                    height=450, font_path=font_path,
                                     stopwords=set(stop_words))
               wordcloud_image = wordcloud.generate_from_frequencies(
                   frequencies=frequency)
