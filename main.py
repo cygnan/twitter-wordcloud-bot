@@ -55,8 +55,8 @@ class MyStreamListener(tweepy.StreamListener):
             query = tweet_text.split(" ", tweet_text.count("@"))[-1]
             query_encoded = urllib.quote_plus(query)
 
-            # from collections import defaultdict
-            # frequency = defaultdict(int)
+            from collections import defaultdict
+            frequency = defaultdict(int)
 
             LOGGER.info('Searching "%s"...',query)
             MAX_TWEETS = 1000
@@ -73,8 +73,6 @@ class MyStreamListener(tweepy.StreamListener):
               LOGGER.info('-> Tweeted "%s"', my_reply)
             else:
               LOGGER.info("Generating a wordcloud image...")
-
-              frequency = {}
 
               for tweet in searched_tweets:
                 text = str(tweet.text.encode("utf-8"))
