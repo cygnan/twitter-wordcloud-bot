@@ -80,7 +80,7 @@ class MyStreamListener(tweepy.StreamListener):
                     word_type = node.feature.split(",")[0]
                     if word_type == "形容詞":
                       word = node.surface
-                      frequency[word] += 10000
+                      frequency[word] += 10
                     elif word_type in ["動詞", "名詞", "副詞"]:
                       word = node.surface
                       frequency[word] += 1
@@ -104,10 +104,12 @@ class MyStreamListener(tweepy.StreamListener):
 
               wordcloud = WordCloud(background_color="white", width=900,
                                     height=450, font_path=fpath,
-                                    stopwords=set(stop_words)).generate(word_list)
+                                    stopwords=set(stop_words))
+              wordcloud_image = wordcloud.generate_from_frequencies(
+                  frequencies=frequency)
 
               file_path = "/tmp/{0}.png".format(str(tweet_id))
-              wordcloud.to_file(file_path)
+              wordcloud_image.to_file(file_path)
               LOGGER.info('Saved a wordcloud image to "{0}"'.format(file_path))
 
               my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
@@ -117,7 +119,6 @@ class MyStreamListener(tweepy.StreamListener):
                                     in_reply_to_status_id=tweet_id)
 
               LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
-
       return
 
     except Exception as e:
