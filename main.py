@@ -86,15 +86,6 @@ class MyStreamListener(tweepy.StreamListener):
 
                 LOGGER.info('-> Tweeted "%s"', my_reply)
               else:
-                # stop_words = [u'てる', u'いる', u'なる', u'れる', u'する', 
-                #               u'ある', u'こと', u'これ', u'さん', u'して', 
-                #               u'くれる', u'やる', u'くださる', u'そう', u'せる',
-                #               u'した',  u'思う', u'それ', u'ここ', u'ちゃん',
-                #               u'くん', u'', u'て', u'に', u'を', u'は', u'の',
-                #               u'が', u'と', u'た', u'し', u'で', u'ない', u'も',
-                #               u'な', u'い', u'か', u'ので', u'よう', u'', u'RT',
-                #               u'@', u'http', u'https', u'.', u':', u'/', u'//',
-                #               u'://']
                 stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                               'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
                               'くださる', 'そう', 'せる', 'した',  '思う', 'それ',
@@ -132,9 +123,6 @@ class MyStreamListener(tweepy.StreamListener):
 
                 font_path = "GenShinGothic-P-Medium.ttf"
 
-                # wordcloud = WordCloud(background_color="white", width=900,
-                #                       height=450, font_path=font_path,
-                #                       stopwords=set(stop_words_decoded))
                 wordcloud = WordCloud(background_color="white", width=900,
                                       height=450, font_path=font_path)
 
@@ -143,14 +131,9 @@ class MyStreamListener(tweepy.StreamListener):
                 wordcloud_image = wordcloud.generate_from_frequencies(
                     frequencies=frequency)
 
-                plt.figure(figsize=(15, 12))
-                plt.imshow(wordcloud)
-
                 file_path = "/tmp/{0}.png".format(str(tweet_id))
                 wordcloud_image.to_file(file_path)
                 LOGGER.info('-> Saved a wordcloud image to "%s"',file_path)
-                # plt.axis("off")
-                # plt.show()
 
                 my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
                     tweet_username, query, str(len(searched_tweets)))  # Test
