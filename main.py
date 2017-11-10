@@ -120,7 +120,7 @@ class MyStreamListener(tweepy.StreamListener):
               # plt.show()
 
               my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-                  tweet_username, query, len(searched_tweets))  # Test
+                  tweet_username, query, str(len(searched_tweets)))  # Test
 
               API.update_with_media(filename=file_path, status=my_reply,
                                     in_reply_to_status_id=tweet_id)
