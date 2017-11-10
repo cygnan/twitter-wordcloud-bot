@@ -4,7 +4,14 @@
 import os
 import logging
 import sys
+import urllib
 import tweepy
+from wordcloud import WordCloud
+from natto import MeCab
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 logging.basicConfig()
 LOGGER = logging.getLogger("main.py")
@@ -16,47 +23,104 @@ ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
 if len(sys.argv) == 2 and str(sys.argv[1]) == "--travis":
-    IS_TRAVIS_CI = True
+  IS_TRAVIS_CI = True
 else:
-    IS_TRAVIS_CI = False
+  IS_TRAVIS_CI = False
 
 
 class MyStreamListener(tweepy.StreamListener):
-    def on_status(self, status):
-        try:
-            tweet_username = str(status.user.screen_name)
-            tweet_text = str(status.text.encode('utf_8'))
+  def on_status(self, status):
+    try:
+      tweet_username = str(status.user.screen_name)
+      tweet_text = str(status.text.encode('utf_8'))
 
-            LOGGER.info('@{0}: "{1}"'.format(tweet_username, tweet_text))
+      LOGGER.info('@{0}: "{1}"'.format(tweet_username, tweet_text))
 
-            is_not_reply = status.in_reply_to_screen_name is None
-            if is_not_reply:
-                LOGGER.info("-> Skipped.")
-            else:
-                tweet_to = str(status.in_reply_to_screen_name)
 
-                is_not_reply_to_me = tweet_to != MY_TWITTER_USERNAME
-                if is_not_reply_to_me:
-                    LOGGER.info("-> Skipped.")
-                else:
-                    my_reply = "@" + tweet_username + " " + tweet_text  # Test
+      is_retweet = "RT " in tweet_text
+      if is_retweet:
+        LOGGER.info("-> Skipped (is_retweet).")
+      else:
+        is_not_reply = status.in_reply_to_screen_name is None
+        if is_not_reply:
+          LOGGER.info("-> Skipped (is_not_reply).")
+        else:
+          tweet_to = str(status.in_reply_to_screen_name)
+          tweet_id = status.id
 
-                    API.update_status(status=my_reply)
+          is_not_reply_to_me = tweet_to != MY_TWITTER_USERNAME
+          if is_not_reply_to_me:
+            LOGGER.info("-> Skipped (is_not_reply_to_me).")
+          else:
+            if "@" in tweet_text and " " in tweet_text:
+              query = tweet_text.split(" ", tweet_text.count("@"))[-1]
+              query_encoded = urllib.quote_plus(query)
 
-                    LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+            from collections import defaultdict
+            frequency = defaultdict(int)
 
-            return
+            LOGGER.info('Searching "{0}"'.format(query))
+            search_result = API.search(q=query_encoded)
+            LOGGER.info('-> {0} tweets found'.format(str(len(search_result))))
 
-        except Exception as e:
-            LOGGER.warning(e)
+            for tweet in search_result:
+              text = str(tweet.text.encode("utf-8"))
+              # filter(tweet.text.encode("utf-8"))
 
-    def on_error(self, status_code):
-        LOGGER.warning("Error")
-        LOGGER.error(status_code)
+              with MeCab() as nm:
+                for node in nm.parse(text, as_nodes=True):
+                  word_type = node.feature.split(",")[0]
+                  if word_type in ["形容詞", "動詞", "名詞", "副詞"]:
+                    word = node.surface
+                    frequency[word] += 1
+              
+            word_list = " ".join(frequency).decode('utf-8')
+
+            fpath = "GenShinGothic-P-Normal.ttf"
+
+            # stop_words = [ u'てる', u'いる', u'なる', u'れる', u'する', u'ある', u'こと',\
+            #        u'これ', u'さん', u'して', u'くれる', u'やる', u'くださる',\
+            #        u'そう', u'せる', u'した',  u'思う', u'それ', u'ここ', u'ちゃん',\
+            #        u'くん', u'', u'て',u'に',u'を',u'は',u'の', u'が', u'と', u'た',\
+            #        u'し', u'で', u'ない', u'も', u'な', u'い', u'か', u'ので',\
+            #        u'よう', u'']
+            stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと',
+                  'これ', 'さん', 'して', 'くれる', 'やる', 'くださる',
+                  'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
+                  'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
+                  'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
+                  'よう', '']
+
+            wordcloud = WordCloud(background_color="white", width=900, 
+                                  height=450, font_path=fpath, 
+                                  stopwords=set(stop_words)).generate(word_list)
+
+            plt.figure(figsize=(15, 12))
+            plt.imshow(wordcloud)
+            wordcloud.to_file("/tmp/image.png")
+            LOGGER.info('Saved an wordcloud image to "/tmp/image.png."')
+            # plt.axis("off")
+            # plt.show()
+
+            my_reply = "@{0} 「{1}」の検索結果".format(tweet_username, query) # Test
+
+            API.update_with_media(filename="/tmp/image.png", status=my_reply, 
+                                  in_reply_to_status_id=tweet_id)
+
+            LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+
+      return
+
+    except Exception as e:
+      LOGGER.warning(e)
+
+  def on_error(self, status_code):
+    LOGGER.warning("Error")
+    LOGGER.error(status_code)
 
 
 if IS_TRAVIS_CI is True:
-    LOGGER.info("Started Travis CI building test...")
+  LOGGER.info("Started Travis CI building test...")
 
 AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -68,16 +132,16 @@ MY_TWITTER_USERNAME = str(API.me().screen_name)
 LOGGER.info("Hello @{0}!".format(MY_TWITTER_USERNAME))
 
 if IS_TRAVIS_CI is True:
-    sys.exit()
+  sys.exit()
 
 try:
-    MY_STREAM = tweepy.Stream(auth=API.auth, listener=MyStreamListener())
+  MY_STREAM = tweepy.Stream(auth=API.auth, listener=MyStreamListener())
 
-    LOGGER.info("Started streaming...")
+  LOGGER.info("Started streaming...")
 
-    MY_STREAM.userstream()
+  MY_STREAM.userstream()
 
-    LOGGER.info("Finished streaming.")
+  LOGGER.info("Finished streaming.")
 
 except Exception as e:
-    LOGGER.warning(e)
+  LOGGER.warning(e)
