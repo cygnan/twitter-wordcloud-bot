@@ -80,7 +80,10 @@ class MyStreamListener(tweepy.StreamListener):
                 with MeCab() as nm:
                   for node in nm.parse(text, as_nodes=True):
                     word_type = node.feature.split(",")[0]
-                    if word_type in ["形容詞", "動詞", "名詞", "副詞"]:
+                    if word_type == "形容詞":
+                      word = node.surface
+                      frequency[word] += 5
+                    elif word_type in ["動詞", "名詞", "副詞"]:
                       word = node.surface
                       frequency[word] += 1
 
