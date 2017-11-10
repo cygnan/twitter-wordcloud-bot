@@ -61,7 +61,7 @@ class MyStreamListener(tweepy.StreamListener):
 
             LOGGER.info('Searching "{0}"'.format(query))
             search_result = API.search(q=query_encoded)
-            LOGGER.info('-> {0} tweets found'.format(str(len(search_result))))
+            LOGGER.info('-> {0} tweets found.'.format(str(len(search_result))))
 
             for tweet in search_result:
               text = str(tweet.text.encode("utf-8"))
