@@ -34,7 +34,7 @@ class MyStreamListener(tweepy.StreamListener):
       tweet_username = str(status.user.screen_name)
       tweet_text = str(status.text.encode('utf_8'))
 
-      LOGGER.info('@{0}: "{1}"'.format(tweet_username, tweet_text))
+      LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
 
 
       is_retweet = "RT " in tweet_text
@@ -58,12 +58,11 @@ class MyStreamListener(tweepy.StreamListener):
             from collections import defaultdict
             frequency = defaultdict(int)
 
-            LOGGER.info('Searching "{0}"...'.format(query))
+            LOGGER.info('Searching "%s"...',query)
             MAX_TWEETS = 1000
             searched_tweets = [status for status in tweepy.Cursor(
                 API.search, q=query_encoded).items(MAX_TWEETS)]
-            LOGGER.info(
-                '-> {0} tweets were found.'.format(str(len(searched_tweets))))
+            LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
             no_hit = len(searched_tweets) == 0
             if no_hit:
@@ -71,7 +70,7 @@ class MyStreamListener(tweepy.StreamListener):
 
               API.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
 
-              LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+              LOGGER.info('-> Tweeted "%s"', my_reply)
             else:
               LOGGER.info("Generating a wordcloud image...")
 
@@ -117,7 +116,7 @@ class MyStreamListener(tweepy.StreamListener):
 
               file_path = "/tmp/{0}.png".format(str(tweet_id))
               wordcloud_image.to_file(file_path)
-              LOGGER.info('Saved a wordcloud image to "{0}"'.format(file_path))
+              LOGGER.info('Saved a wordcloud image to "%s"',file_path)
               # plt.axis("off")
               # plt.show()
 
@@ -127,7 +126,7 @@ class MyStreamListener(tweepy.StreamListener):
               API.update_with_media(filename=file_path, status=my_reply,
                                     in_reply_to_status_id=tweet_id)
 
-              LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
+              LOGGER.info('-> Tweeted "%s"',my_reply)
       return
 
     except Exception as e:
@@ -148,7 +147,7 @@ API = tweepy.API(AUTH)
 LOGGER.info("Authentication successful.")
 
 MY_TWITTER_USERNAME = str(API.me().screen_name)
-LOGGER.info("Hello @{0}!".format(MY_TWITTER_USERNAME))
+LOGGER.info("Hello @%s!",MY_TWITTER_USERNAME)
 
 if IS_TRAVIS_CI is True:
   sys.exit()
