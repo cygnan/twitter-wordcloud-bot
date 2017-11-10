@@ -97,14 +97,16 @@ class MyStreamListener(tweepy.StreamListener):
 
             plt.figure(figsize=(15, 12))
             plt.imshow(wordcloud)
-            wordcloud.to_file("/tmp/image.png")
-            LOGGER.info('Saved an wordcloud image to "/tmp/image.png."')
+
+            file_path = "/tmp/{0}.png".format(str(tweet_id))
+            wordcloud.to_file(file_path)
+            LOGGER.info('Saved an wordcloud image to "{0}"'.format(file_path))
             # plt.axis("off")
             # plt.show()
 
             my_reply = "@{0} 「{1}」の検索結果".format(tweet_username, query) # Test
 
-            API.update_with_media(filename="/tmp/image.png", status=my_reply, 
+            API.update_with_media(filename=file_path, status=my_reply,
                                   in_reply_to_status_id=tweet_id)
 
             LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
