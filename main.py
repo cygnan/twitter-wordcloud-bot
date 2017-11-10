@@ -101,11 +101,13 @@ class MyStreamListener(tweepy.StreamListener):
                 'そう', 'せる', 'した',  '思う', 'それ', 'ここ', 'ちゃん',
                 'くん', '', 'て', 'に', 'を', 'は', 'の', 'が', 'と', 'た',
                 'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
-                'よう', '']
+                            'よう', '']
+                            
+              stop_words_decoded = [x.decode('utf-8') for x in stop_words]
 
               wordcloud = WordCloud(background_color="white", width=900,
                                     height=450, font_path=font_path,
-                                    stopwords=set(stop_words))
+                                    stopwords=set(stop_words_decoded))
               wordcloud_image = wordcloud.generate_from_frequencies(
                   frequencies=frequency)
 
