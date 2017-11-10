@@ -109,7 +109,7 @@ class MyStreamListener(tweepy.StreamListener):
                       word_type = node.feature.split(",")[0]
                       if word_type == "形容詞":
                         word_decoded = word.decode('utf-8')
-                        frequency[word_decoded] += 10
+                        frequency[word_decoded] += 100
                       elif word_type in ["動詞", "名詞", "副詞"]:
                         word_decoded = word.decode('utf-8')
                         frequency[word_decoded] += 1
