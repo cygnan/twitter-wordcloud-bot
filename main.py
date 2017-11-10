@@ -128,7 +128,7 @@ class MyStreamListener(tweepy.StreamListener):
                           word_decoded = word.decode('utf-8')
                           frequency[word_decoded] += 1
 
-                LOGGER.info("Done.")
+                LOGGER.info("-> Done.")
 
                 font_path = "GenShinGothic-P-Normal.ttf"
 
@@ -148,7 +148,7 @@ class MyStreamListener(tweepy.StreamListener):
 
                 file_path = "/tmp/{0}.png".format(str(tweet_id))
                 wordcloud_image.to_file(file_path)
-                LOGGER.info('Saved a wordcloud image to "%s"',file_path)
+                LOGGER.info('-> Saved a wordcloud image to "%s"',file_path)
                 # plt.axis("off")
                 # plt.show()
 
@@ -158,7 +158,7 @@ class MyStreamListener(tweepy.StreamListener):
                 api.update_with_media(filename=file_path, status=my_reply,
                                       in_reply_to_status_id=tweet_id)
 
-                LOGGER.info('-> Tweeted "%s"',my_reply)
+                LOGGER.info('Tweeted "%s"', my_reply)
             except Exception as e:
               LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
@@ -167,7 +167,7 @@ class MyStreamListener(tweepy.StreamListener):
               api.update_status(
                   status=my_reply, in_reply_to_status_id=tweet_id)
 
-              LOGGER.info('-> Tweeted "%s"', my_reply)
+              LOGGER.info('Tweeted "%s"', my_reply)
       return
 
     except Exception as e:
