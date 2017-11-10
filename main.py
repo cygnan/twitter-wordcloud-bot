@@ -84,7 +84,7 @@ class MyStreamListener(tweepy.StreamListener):
                     word_type = node.feature.split(",")[0]
                     if word_type == "形容詞":
                       word = node.surface
-                      frequency[word] += 1000
+                      frequency[word] += 10000
                     elif word_type in ["動詞", "名詞", "副詞"]:
                       word = node.surface
                       frequency[word] += 1
