@@ -63,9 +63,10 @@ class MyStreamListener(tweepy.StreamListener):
             MAX_TWEETS = 1000
             searched_tweets = [status for status in tweepy.Cursor(
                 API.search, q=query_encoded).items(MAX_TWEETS)]
-            LOGGER.info('-> {0} tweets found.'.format(str(len(search_result))))
+            LOGGER.info(
+                '-> {0} tweets found.'.format(str(len(searched_tweets))))
 
-            no_hit = len(search_result) == 0
+            no_hit = len(searched_tweets) == 0
             if no_hit:
               my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
@@ -73,7 +74,7 @@ class MyStreamListener(tweepy.StreamListener):
 
               LOGGER.info('-> Tweeted "{0}"'.format(my_reply))
             else:
-              for tweet in search_result:
+              for tweet in searched_tweets:
                 text = str(tweet.text.encode("utf-8"))
                 # filter(tweet.text.encode("utf-8"))
 
