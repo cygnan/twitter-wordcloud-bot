@@ -58,7 +58,7 @@ class MyStreamListener(tweepy.StreamListener):
             from collections import defaultdict
             frequency = defaultdict(int)
 
-            LOGGER.info('Searching "%s"...',query)
+            LOGGER.info('Searching "%s"...', query)
             MAX_TWEETS = 1000
             searched_tweets = [status for status in tweepy.Cursor(
                 API.search, q=query_encoded).items(MAX_TWEETS)]
@@ -82,10 +82,10 @@ class MyStreamListener(tweepy.StreamListener):
                   for node in nm.parse(text, as_nodes=True):
                     word_type = node.feature.split(",")[0]
                     if word_type == "形容詞":
-                      word = node.surface
+                      word = node.surface.decode('utf-8')
                       frequency[word] += 10
                     elif word_type in ["動詞", "名詞", "副詞"]:
-                      word = node.surface
+                      word = node.surface.decode('utf-8')
                       frequency[word] += 1
 
               font_path = "GenShinGothic-P-Normal.ttf"
