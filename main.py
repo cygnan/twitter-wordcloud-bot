@@ -130,7 +130,7 @@ class MyStreamListener(tweepy.StreamListener):
       return
 
     except Exception as e:
-      LOGGER.warning(e)
+      LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
   def on_error(self, status_code):
     LOGGER.warning("Error")
@@ -162,4 +162,4 @@ try:
   LOGGER.info("Finished streaming.")
 
 except Exception as e:
-  LOGGER.warning(e)
+  LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
