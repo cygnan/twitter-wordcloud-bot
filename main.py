@@ -112,11 +112,13 @@ class MyStreamListener(tweepy.StreamListener):
                       is_not_stop_word = word not in stop_words
                       if is_not_stop_word:
                         word_type = node.feature.split(",")[0]
+                        word_decoded = word.decode('utf-8')
                         if word_type == "形容詞":
-                          word_decoded = word.decode('utf-8')
-                          frequency[word_decoded] += 100
+                          if word[-1:] == "く":
+                            frequency[word_decoded] += 1
+                          else:
+                            frequency[word_decoded] += 100
                         elif word_type in ["動詞", "名詞", "副詞"]:
-                          word_decoded = word.decode('utf-8')
                           frequency[word_decoded] += 1
 
                 LOGGER.info("-> Done.")
