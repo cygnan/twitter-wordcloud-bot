@@ -11,8 +11,7 @@ from wordcloud import WordCloud
 from natto import MeCab
 
 import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+matplotlib.use('Agg')  # Set the filetype	to png
 
 logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
 LOGGER = logging.getLogger("main.py")
