@@ -59,7 +59,7 @@ class MyStreamListener(tweepy.StreamListener):
               from collections import defaultdict
               frequency = defaultdict(int)
 
-              MAX_TWEETS = 1000
+              MAX_TWEETS = 500
 
               while True:
                 try:
