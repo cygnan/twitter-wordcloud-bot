@@ -74,7 +74,7 @@ class MyStreamListener(tweepy.StreamListener):
                     time.sleep(60)
                   else:
                     raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
-              
+
               LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
               no_hit = len(searched_tweets) == 0
@@ -87,7 +87,7 @@ class MyStreamListener(tweepy.StreamListener):
               else:
                 stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                               'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                              'くださる', 'そう', 'せる', 'した',  '思う', 'それ',
+                              'くださる', 'そう', 'せる', 'した', '思う', 'それ',
                               'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
                               'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
                               'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
@@ -134,7 +134,7 @@ class MyStreamListener(tweepy.StreamListener):
 
                 file_path = "/tmp/{0}.png".format(str(tweet_id))
                 wordcloud_image.to_file(file_path)
-                LOGGER.info('-> Saved a wordcloud image to "%s"',file_path)
+                LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
 
                 my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
                     tweet_username, query, str(len(searched_tweets)))  # Test
@@ -177,7 +177,7 @@ api = certify()
 LOGGER.info("Authentication successful.")
 
 MY_TWITTER_USERNAME = str(api.me().screen_name)
-LOGGER.info("Hello @%s!",MY_TWITTER_USERNAME)
+LOGGER.info("Hello @%s!", MY_TWITTER_USERNAME)
 
 if IS_TRAVIS_CI is True:
   sys.exit()
