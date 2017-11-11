@@ -66,7 +66,7 @@ class MyStreamListener(tweepy.StreamListener):
                 try:
                   LOGGER.info('Searching "%s"...', query)
                   searched_tweets = [status for status in tweepy.Cursor(
-                      api.search, q=query_encoded).items(MAX_TWEETS)]
+                      api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
                   break
                 except Exception as e:
                   is_429_too_many_requests_error = str(e).find("429") != -1
