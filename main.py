@@ -122,7 +122,7 @@ class MyStreamListener(tweepy.StreamListener):
 
                 LOGGER.info("-> Done.")
 
-                font_path = "GenJyuuGothic-P-Bold.ttf"
+                font_path = "rounded-mplus-1p-heavy.ttf"
 
                 wordcloud = WordCloud(background_color="white", width=900,
                                       height=450, font_path=font_path)
