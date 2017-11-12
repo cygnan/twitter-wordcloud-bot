@@ -102,7 +102,6 @@ class MyStreamListener(tweepy.StreamListener):
 
                 for tweet in searched_tweets:
                   text = str(tweet.text.encode("utf-8"))
-                  # filter(tweet.text.encode("utf-8"))
 
                   with MeCab() as nm:
                     for node in nm.parse(text, as_nodes=True):
