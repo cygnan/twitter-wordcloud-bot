@@ -22,10 +22,7 @@ CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
-if len(sys.argv) == 2 and str(sys.argv[1]) == "--travis":
-  IS_TRAVIS_CI = True
-else:
-  IS_TRAVIS_CI = False
+IS_TRAVIS_CI = bool(len(sys.argv) == 2 and str(sys.argv[1]) == "--travis")
 
 
 class MyStreamListener(tweepy.StreamListener):
