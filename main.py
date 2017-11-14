@@ -33,7 +33,6 @@ class MyStreamListener(tweepy.StreamListener):
 
       LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
 
-
       is_retweet = "RT " in tweet_text
       if is_retweet:
         LOGGER.info("-> Skipped (is_retweet).")
