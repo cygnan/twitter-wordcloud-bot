@@ -4,6 +4,10 @@ engines:
     checks:
       E501:
         enabled: false
+      E111:
+        enabled: false
+      E114:
+        enabled: false
 
   radon: 
     enabled: true
