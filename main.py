@@ -167,7 +167,8 @@ def certify():
 
 
 if IS_TRAVIS_CI is True:
-  LOGGER.info("Started Travis CI building test...")
+  LOGGER.info("Travis CI build succeeded.")
+  sys.exit()
 
 api = certify()
 
@@ -175,9 +176,6 @@ LOGGER.info("Authentication successful.")
 
 MY_TWITTER_USERNAME = str(api.me().screen_name)
 LOGGER.info("Hello @%s!", MY_TWITTER_USERNAME)
-
-if IS_TRAVIS_CI is True:
-  sys.exit()
 
 try:
   MY_STREAM = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
