@@ -165,7 +165,7 @@ def is_reply_to_me(status):
     # If the tweet is a retweet, then skipped.
     if "RT " in tweet_text:
       LOGGER.info("-> Skipped (a retweet).")
-      return  False
+      return False
 
     # If the tweet is not a reply, then skipped.
     if status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text:
