@@ -135,7 +135,6 @@ class MyStreamListener(tweepy.StreamListener):
         LOGGER.info('Tweeted "%s"', my_reply)
     return
 
-
   def on_error(self, status_code):
     LOGGER.warning("Error")
     LOGGER.error(status_code)
