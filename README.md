@@ -51,3 +51,8 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 ## Usage
 
 Tweet a search query to your Twitter bot. Then it will search tweets and reply with a wordcloud image.
+
+## License
+
+Copyright © 2017 Cygnan  
+Licensed under the MIT License with the exception of a font, see [LICENSE.md](LICENSE.md).
