@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import logging
+import os
 import sys
 import time
 import urllib
-import tweepy
-from wordcloud import WordCloud
-from natto import MeCab
+from collections import defaultdict
 
 import matplotlib
+import tweepy
+from natto import MeCab
+from wordcloud import WordCloud
+
 matplotlib.use('Agg')  # Set the filetype	to png
 
 logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
@@ -53,7 +55,6 @@ class MyStreamListener(tweepy.StreamListener):
               query = tweet_text.split(" ", tweet_text.count("@"))[-1]
               query_encoded = urllib.quote_plus(query)
 
-              from collections import defaultdict
               frequency = defaultdict(int)
 
               MAX_TWEETS = 500
