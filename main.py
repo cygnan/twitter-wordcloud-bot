@@ -17,12 +17,13 @@ logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
 LOGGER = logging.getLogger("main.py")
 LOGGER.setLevel(logging.DEBUG)
 
-CONSUMER_KEY = os.environ["CONSUMER_KEY"]
-CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
-ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
-
 IS_TRAVIS_CI = bool(len(sys.argv) == 2 and str(sys.argv[1]) == "--travis")
+
+if not IS_TRAVIS_CI:
+  CONSUMER_KEY = os.environ["CONSUMER_KEY"]
+  CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
+  ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+  ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
 
 
 class MyStreamListener(tweepy.StreamListener):
@@ -167,7 +168,8 @@ def certify():
 
 
 if IS_TRAVIS_CI is True:
-  LOGGER.info("Started Travis CI building test...")
+  LOGGER.info("Travis CI build succeeded.")
+  sys.exit()
 
 api = certify()
 
@@ -175,9 +177,6 @@ LOGGER.info("Authentication successful.")
 
 MY_TWITTER_USERNAME = str(api.me().screen_name)
 LOGGER.info("Hello @%s!", MY_TWITTER_USERNAME)
-
-if IS_TRAVIS_CI is True:
-  sys.exit()
 
 try:
   MY_STREAM = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
