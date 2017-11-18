@@ -14,7 +14,7 @@ import matplotlib
 matplotlib.use('Agg')  # Set the filetype	to png
 
 logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
-LOGGER = logging.getLogger("main.py")
+LOGGER = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 LOGGER.setLevel(logging.DEBUG)
 
 IS_TRAVIS_CI = bool(len(sys.argv) == 2 and str(sys.argv[1]) == "--travis")
