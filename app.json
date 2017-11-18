@@ -1,0 +1,21 @@
+{
+  "name": "twitter-wordcloud-bot",
+  "description": "A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.",
+  "keywords": [
+    "python"
+  ],
+  "env": {
+    "CONSUMER_KEY": {
+      "description": "Twitter Consumer Key"
+    },
+    "CONSUMER_SECRET": {
+      "description": "Twitter Consumer Secret"
+    },
+    "ACCESS_TOKEN": {
+      "description": "Twitter Access Token"
+    },
+    "ACCESS_TOKEN_SECRET": {
+      "description": "Twitter Access Token Secret"
+    }
+  }
+}
