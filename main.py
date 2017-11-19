@@ -162,6 +162,12 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 def certify():
+  """
+  Authenticate with Twitter using Tweepy and return Twitter API object.
+
+  :returns: Twitter API object
+  :rtype: Twitter API object
+  """
   auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
   auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
   api = tweepy.API(auth)
