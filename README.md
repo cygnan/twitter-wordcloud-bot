@@ -14,14 +14,14 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 
 1. Clone this repository
 
-   ```
+   ```bash
    git clone https://github.com/cygnan/twitter-wordcloud-bot
    cd twitter-wordcloud-bot
    ```
 
 1. Create a Heroku app and add some configs
 
-   ```
+   ```bash
    heroku create {APP_NAME}
    heroku config:set LD_LIBRARY_PATH=/app/.linuxbrew/lib
    heroku config:set MECAB_PATH=/app/.linuxbrew/lib/libmecab.so
@@ -32,7 +32,7 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 
 1. Get your Twitter API keys and tokens and set them.
 
-   ```
+   ```bash
    heroku config:set CONSUMER_KEY={YOUR_CONSUMER_KEY}
    heroku config:set CONSUMER_SECRET={YOUR_CONSUMER_SECRET}
    heroku config:set ACCESS_TOKEN={YOUR_ACCESS_TOKEN}
@@ -43,7 +43,7 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 
 1. Deploy your app
 
-   ```
+   ```bash
    git push heroku master
    heroku ps:scale worker=1
    ```
