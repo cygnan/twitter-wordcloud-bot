@@ -30,28 +30,12 @@ if not IS_TRAVIS_CI:
 
 class MyStreamListener(tweepy.StreamListener):
   def on_status(self, status):
+    if is_mention_or_reply_to_me(status):
     try:
       tweet_username = str(status.user.screen_name)
       tweet_text = str(status.text.encode('utf_8'))
-
-      LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
-
-      is_retweet = "RT " in tweet_text
-      if is_retweet:
-        LOGGER.info("-> Skipped (is_retweet).")
-      else:
-        is_not_reply = status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text
-        if is_not_reply:
-          LOGGER.info("-> Skipped (is_not_reply).")
-        else:
-          tweet_to = str(status.in_reply_to_screen_name)
           tweet_id = status.id
 
-          is_not_reply_to_me = tweet_to != MY_TWITTER_USERNAME
-          if is_not_reply_to_me:
-            LOGGER.info("-> Skipped (is_not_reply_to_me).")
-          else:
-            try:
               query = tweet_text.split(" ", tweet_text.count("@"))[-1]
               query_encoded = urllib.quote_plus(query)
 
@@ -153,8 +137,6 @@ class MyStreamListener(tweepy.StreamListener):
               LOGGER.info('Tweeted "%s"', my_reply)
       return
 
-    except Exception as e:
-      LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
   def on_error(self, status_code):
     LOGGER.warning("Error")
@@ -172,6 +154,45 @@ def certify():
   auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
   api = tweepy.API(auth)
   return api
+
+
+def is_mention_or_reply_to_me(status):
+  """
+  Determine whether the tweet is a mention or a reply to me or not.
+
+  :param status: A tweet status
+  :type status: A tweet object
+  :returns: True if the tweet is a mention or a reply to me, otherwise False
+  :rtype: bool
+  """
+  try:
+    tweet_username = str(status.user.screen_name)
+    tweet_text = str(status.text.encode('utf_8'))
+
+    LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
+
+    # If the tweet is a retweet, then skipped.
+    if "RT " in tweet_text:
+      LOGGER.info("-> Skipped (a retweet).")
+      return  False
+
+    # If the tweet is neither a mention nor a reply, then skipped.
+    if status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text:
+      LOGGER.info("-> Skipped (neither a mention nor a reply).")
+      return False
+
+    tweet_to = str(status.in_reply_to_screen_name)
+    tweet_id = status.id
+
+    # If the tweet is neither a mention nor a reply to me, then skipped.
+    if tweet_to != MY_TWITTER_USERNAME:
+      LOGGER.info("-> Skipped (neither a mention nor a reply to me).")
+      return False
+
+    return True
+
+  except Exception as e:
+    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
 
 if IS_TRAVIS_CI is True:
