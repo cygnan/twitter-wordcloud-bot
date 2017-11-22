@@ -31,111 +31,111 @@ if not IS_TRAVIS_CI:
 class MyStreamListener(tweepy.StreamListener):
   def on_status(self, status):
     if is_mention_or_reply_to_me(status):
-    try:
-      tweet_username = str(status.user.screen_name)
-      tweet_text = str(status.text.encode('utf_8'))
-          tweet_id = status.id
+      try:
+        tweet_username = str(status.user.screen_name)
+        tweet_text = str(status.text.encode('utf_8'))
+        tweet_id = status.id
 
-              query = tweet_text.split(" ", tweet_text.count("@"))[-1]
-              query_encoded = urllib.quote_plus(query)
+        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
+        query_encoded = urllib.quote_plus(query)
 
-              frequency = defaultdict(int)
+        frequency = defaultdict(int)
 
-              MAX_TWEETS = 500
+        MAX_TWEETS = 500
 
-              while True:
-                try:
-                  LOGGER.info('Searching "%s"...', query)
-                  searched_tweets = [status for status in tweepy.Cursor(
-                      api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
-                  break
-                except Exception as e:
-                  is_429_too_many_requests_error = str(e).find("429") != -1
-                  if is_429_too_many_requests_error:
-                    LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
-                    time.sleep(60)
-                  else:
-                    raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
+        while True:
+          try:
+            LOGGER.info('Searching "%s"...', query)
+            searched_tweets = [status for status in tweepy.Cursor(
+                api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
+            break
+          except Exception as e:
+            is_429_too_many_requests_error = str(e).find("429") != -1
+            if is_429_too_many_requests_error:
+              LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
+              time.sleep(60)
+            else:
+              raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
 
-              LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
+        LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
-              no_hit = len(searched_tweets) == 0
-              if no_hit:
-                my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
+        no_hit = len(searched_tweets) == 0
+        if no_hit:
+          my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
-                api.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
+          api.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
 
-                LOGGER.info('-> Tweeted "%s"', my_reply)
-              else:
-                stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
-                              'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                              'くださる', 'そう', 'せる', 'した', '思う', 'それ',
-                              'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
-                              'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                              'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
-                              '@', 'http', 'https', '.', ':', '/', '//', '://']
+          LOGGER.info('-> Tweeted "%s"', my_reply)
+        else:
+          stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
+                        'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
+                        'くださる', 'そう', 'せる', 'した', '思う', 'それ',
+                        'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
+                        'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
+                        'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
+                        '@', 'http', 'https', '.', ':', '/', '//', '://']
 
-                with MeCab() as nm:
-                  for node in nm.parse(query, as_nodes=True):
-                    word = node.surface
-                    stop_words.append(word)
+          with MeCab() as nm:
+            for node in nm.parse(query, as_nodes=True):
+              word = node.surface
+              stop_words.append(word)
 
-                LOGGER.info("Doing morphological analysis using MeCab...")
+          LOGGER.info("Doing morphological analysis using MeCab...")
 
-                for tweet in searched_tweets:
-                  text = str(tweet.text.encode("utf-8"))
+          for tweet in searched_tweets:
+            text = str(tweet.text.encode("utf-8"))
 
-                  with MeCab() as nm:
-                    for node in nm.parse(text, as_nodes=True):
-                      word = node.surface
+            with MeCab() as nm:
+              for node in nm.parse(text, as_nodes=True):
+                word = node.surface
 
-                      is_not_stop_word = word not in stop_words
-                      if is_not_stop_word:
-                        word_type = node.feature.split(",")[0]
-                        word_decoded = node.surface.decode('utf-8')
-                        word_original_form_decoded = node.feature.split(
-                          ",")[6].decode('utf-8')
-                        if word_type == "形容詞":
-                          frequency[word_original_form_decoded] += 100
-                        elif word_type == "動詞":
-                          frequency[word_original_form_decoded] += 1
-                        elif word_type in ["名詞", "副詞"]:
-                          frequency[word_decoded] += 1
+                is_not_stop_word = word not in stop_words
+                if is_not_stop_word:
+                  word_type = node.feature.split(",")[0]
+                  word_decoded = node.surface.decode('utf-8')
+                  word_original_form_decoded = node.feature.split(
+                    ",")[6].decode('utf-8')
+                  if word_type == "形容詞":
+                    frequency[word_original_form_decoded] += 100
+                  elif word_type == "動詞":
+                    frequency[word_original_form_decoded] += 1
+                  elif word_type in ["名詞", "副詞"]:
+                    frequency[word_decoded] += 1
 
-                LOGGER.info("-> Done.")
+          LOGGER.info("-> Done.")
 
-                font_path = "rounded-mplus-1p-bold.ttf"
+          font_path = "rounded-mplus-1p-bold.ttf"
 
-                wordcloud = WordCloud(background_color="white", width=900,
-                                      height=450, font_path=font_path,
-                                      min_font_size=12)
+          wordcloud = WordCloud(background_color="white", width=900,
+                                height=450, font_path=font_path,
+                                min_font_size=12)
 
-                LOGGER.info("Generating a wordcloud image...")
+          LOGGER.info("Generating a wordcloud image...")
 
-                wordcloud_image = wordcloud.generate_from_frequencies(
-                    frequencies=frequency)
+          wordcloud_image = wordcloud.generate_from_frequencies(
+              frequencies=frequency)
 
-                file_path = "/tmp/{0}.png".format(str(tweet_id))
-                wordcloud_image.to_file(file_path)
-                LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
+          file_path = "/tmp/{0}.png".format(str(tweet_id))
+          wordcloud_image.to_file(file_path)
+          LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
 
-                my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-                    tweet_username, query, str(len(searched_tweets)))  # Test
+          my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
+              tweet_username, query, str(len(searched_tweets)))  # Test
 
-                api.update_with_media(filename=file_path, status=my_reply,
-                                      in_reply_to_status_id=tweet_id)
+          api.update_with_media(filename=file_path, status=my_reply,
+                                in_reply_to_status_id=tweet_id)
 
-                LOGGER.info('Tweeted "%s"', my_reply)
-            except Exception as e:
-              LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+          LOGGER.info('Tweeted "%s"', my_reply)
+      except Exception as e:
+        LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
-              my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
+        my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
 
-              api.update_status(
-                  status=my_reply, in_reply_to_status_id=tweet_id)
+        api.update_status(
+            status=my_reply, in_reply_to_status_id=tweet_id)
 
-              LOGGER.info('Tweeted "%s"', my_reply)
-      return
+        LOGGER.info('Tweeted "%s"', my_reply)
+    return
 
 
   def on_error(self, status_code):
