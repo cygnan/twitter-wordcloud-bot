@@ -137,7 +137,6 @@ class MyStreamListener(tweepy.StreamListener):
         LOGGER.info('Tweeted "%s"', my_reply)
     return
 
-
   def on_error(self, status_code):
     LOGGER.warning("Error")
     LOGGER.error(status_code)
@@ -174,7 +173,7 @@ def is_mention_or_reply_to_me(status):
     # If the tweet is a retweet, then skipped.
     if "RT " in tweet_text:
       LOGGER.info("-> Skipped (a retweet).")
-      return  False
+      return False
 
     # If the tweet is neither a mention nor a reply, then skipped.
     if status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text:
