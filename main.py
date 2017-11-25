@@ -217,27 +217,29 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
   .. warning:: Either status or filename must be given.
   """
   try:
-    # If neither status nor filename is defined, then raise NameError.
-    if filename is None and status is None:
-      raise NameError("Neither status nor filename is defined")
+    if filename is None:
+      if status is None:
+        # If neither status nor filename is defined, then raise NameError.
+        raise NameError("Neither status nor filename is defined")
 
-    # Reply with text
-    elif filename is None and status is not None:
-      api.update_status(in_reply_to_status_id=in_reply_to_status_id,
-                        status=status)
-      LOGGER.info('-> Tweeted "%s"', status)
+      else:
+        # Reply with text
+        api.update_status(in_reply_to_status_id=in_reply_to_status_id,
+                          status=status)
+        LOGGER.info('-> Tweeted "%s"', status)
 
-    # Reply with an image
-    elif filename is not None and status is None:
-      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                            filename=filename)
-      LOGGER.info("-> Tweeted an image")
-
-    # Reply with both text and an image
     else:
-      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                            status=status, filename=filename)
-      LOGGER.info('-> Tweeted "%s"', status)
+      if status is None:
+        # Reply with an image
+        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                              filename=filename)
+        LOGGER.info("-> Tweeted an image")
+
+      else:
+        # Reply with both text and an image
+        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                              status=status, filename=filename)
+        LOGGER.info('-> Tweeted "%s"', status)
 
     return
 
