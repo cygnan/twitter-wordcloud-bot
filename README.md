@@ -7,7 +7,7 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 
 ## Requirements
 
-- A free Heroku account
+- A free Heroku account (No credit card required)
 - Heroku CLI
 
 ## How to deploy to Heroku
