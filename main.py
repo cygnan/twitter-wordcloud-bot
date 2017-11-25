@@ -197,7 +197,7 @@ def is_mention_or_reply_to_me(status):
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
 
-def reply(api, in_reply_to_status_id, status=None, filename=None):
+def reply(api, in_reply_to_status_id, status, filename):
   """
   Reply with either text, an image, or both
 
@@ -217,27 +217,24 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
   .. warning:: Either status or filename must be given.
   """
   try:
-    if filename is None and status is None:
-      # If neither status nor filename is defined, then raise NameError.
-      raise NameError("Neither status nor filename is defined")
-
-    elif filename is None:
-      # Reply with text
-      api.update_status(in_reply_to_status_id=in_reply_to_status_id,
-                        status=status)
-      LOGGER.info('-> Tweeted "%s"', status)
-
-    elif status is None:
-      # Reply with an image
-      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                            filename=filename)
-      LOGGER.info("-> Tweeted an image")
-
-    else:
+    try:
       # Reply with both text and an image
       api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
                             status=status, filename=filename)
       LOGGER.info('-> Tweeted "%s"', status)
+
+    except NameError:
+      try:
+        # Reply with text
+        api.update_status(in_reply_to_status_id=in_reply_to_status_id,
+                          status=status)
+        LOGGER.info('-> Tweeted "%s"', status)
+
+      except NameError:
+        # Reply with an image
+        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                              filename=filename)
+        LOGGER.info("-> Tweeted an image")
 
     return
 
