@@ -224,36 +224,30 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
     return "Error"
 
-  # If neither status nor filename is defined, then returns "Error"
   try:
+    # If neither status nor filename is defined, then returns "Error"
     if status is None and filename is None:
       raise NameError("Neither status nor filename is defined")
-  except NameError as e:
-    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-    return "Error"
 
-  try:
+    # Reply with text
     if filename is None:
-      # Reply with text
       api.update_status(in_reply_to_status_id=in_reply_to_status_id,
                         status=status)
       LOGGER.info('-> Tweeted "%s"', status)
-      return
 
-    if status is None:
-      # Reply with an image
+    # Reply with an image
+    elif status is None:
       api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
                             filename=filename)
       LOGGER.info("-> Tweeted an image")
-      return
 
+    # Reply with both text and an image
     else:
-      # Reply with both text and an image
       api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
                             status=status, filename=filename)
       LOGGER.info('-> Tweeted "%s"', status)
-      return
 
+    return
 
   except Exception as e:
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
