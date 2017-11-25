@@ -2,3 +2,4 @@ matplotlib
 tweepy
 natto-py
 wordcloud
+backports.functools-lru-cache
