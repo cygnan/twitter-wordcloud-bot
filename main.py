@@ -66,7 +66,7 @@ class MyStreamListener(tweepy.StreamListener):
           res = reply(api=api, in_reply_to_status_id=tweet_id, status=my_reply)
           if res == "Error":
             raise Exception("Failed to tweet.")
-          
+
         else:
           stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                         'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
