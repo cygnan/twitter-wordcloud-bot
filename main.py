@@ -217,10 +217,6 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
   .. warning:: Either status or filename must be given.
   """
   try:
-    # If neither status nor filename is defined, then returns "Error"
-    if status is None and filename is None:
-      raise NameError("Neither status nor filename is defined")
-
     # Reply with text
     if filename is None:
       api.update_status(in_reply_to_status_id=in_reply_to_status_id,
