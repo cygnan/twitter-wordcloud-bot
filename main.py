@@ -216,14 +216,6 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
 
   .. warning:: Either status or filename must be given.
   """
-
-  # If either api, in_reply_to_status_id, or both are undefined, then returns "Error"
-  try:
-    api, in_reply_to_status_id
-  except NameError as e:
-    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-    return "Error"
-
   try:
     # If neither status nor filename is defined, then returns "Error"
     if status is None and filename is None:
