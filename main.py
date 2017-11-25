@@ -238,21 +238,22 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
       api.update_status(in_reply_to_status_id=in_reply_to_status_id,
                         status=status)
       LOGGER.info('-> Tweeted "%s"', status)
+      return
+
+    if status is None:
+      # Reply with an image
+      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                            filename=filename)
+      LOGGER.info("-> Tweeted an image")
+      return
 
     else:
-      if status is None:
-        # Reply with an image
-        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                              filename=filename)
-        LOGGER.info("-> Tweeted an image")
+      # Reply with both text and an image
+      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                            status=status, filename=filename)
+      LOGGER.info('-> Tweeted "%s"', status)
+      return
 
-      else:
-        # Reply with both text and an image
-        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                              status=status, filename=filename)
-        LOGGER.info('-> Tweeted "%s"', status)
-
-    return
 
   except Exception as e:
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
