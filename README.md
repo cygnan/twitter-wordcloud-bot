@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/cygnan/twitter-wordcloud-bot.svg?branch=master)](https://travis-ci.org/cygnan/twitter-wordcloud-bot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6302b1e5c142245d7d6a/maintainability)](https://codeclimate.com/github/cygnan/twitter-wordcloud-bot/maintainability)
+[![Hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)](https://houndci.com)
 
 A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.
 

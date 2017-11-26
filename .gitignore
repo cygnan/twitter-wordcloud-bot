@@ -5,3 +5,4 @@
 !/.buildpacks
 !/.cellar
 !/.pylintrc
+!/.hound.yml
