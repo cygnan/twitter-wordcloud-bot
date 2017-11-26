@@ -197,14 +197,14 @@ def is_mention_or_reply_to_me(status):
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
 
-def reply(api, in_reply_to_status_id, status=None, filename=None):
+def reply(api, in_reply_to_status_id, status, filename=None):
   """
-  Reply with either text, an image, or both
+  Reply with text, or with both text and an image
 
   :param api: Twitter API object (required)
   :type api: Twitter API object
   :param int in_reply_to_status_id: The ID of an existing status that the update is in reply to (required)
-  :param str status: The text of your status update (optional)
+  :param str status: The text of your status update (required)
   :param str filename: The local path to image file to upload (optional)
   :returns: "Error" if something goes wrong, otherwise None
   :rtype: str or None
@@ -213,8 +213,6 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
 
   >>> reply(api=api, in_reply_to_status_id=in_reply_to_status_id,
             status="text")
-
-  .. warning:: Either status or filename must be given.
   """
   try:
     # Reply with text
@@ -222,12 +220,6 @@ def reply(api, in_reply_to_status_id, status=None, filename=None):
       api.update_status(in_reply_to_status_id=in_reply_to_status_id,
                         status=status)
       LOGGER.info('-> Tweeted "%s"', status)
-
-    # Reply with an image
-    elif status is None:
-      api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                            filename=filename)
-      LOGGER.info("-> Tweeted an image")
 
     # Reply with both text and an image
     else:
