@@ -13,7 +13,7 @@ import tweepy
 from natto import MeCab
 from wordcloud import WordCloud
 
-matplotlib.use('Agg')  # Set the filetype	to png
+matplotlib.use('Agg')  # Set the filetype to png
 
 logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
 LOGGER = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
