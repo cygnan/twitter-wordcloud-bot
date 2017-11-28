@@ -9,6 +9,7 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
 
 - A free Heroku account (No credit card required)
 - Heroku CLI
+- A Twitter account
 
 ## How to deploy to Heroku
 
