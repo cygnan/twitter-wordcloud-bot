@@ -219,13 +219,13 @@ def reply(twi_api, in_reply_to_status_id, status, filename=None):
     # Reply with text
     if filename is None:
       twi_api.update_status(in_reply_to_status_id=in_reply_to_status_id,
-                        status=status)
+                            status=status)
       LOGGER.info('-> Tweeted "%s"', status)
 
     # Reply with both text and an image
     else:
       twi_api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                            status=status, filename=filename)
+                                status=status, filename=filename)
       LOGGER.info('-> Tweeted "%s"', status)
 
     return
