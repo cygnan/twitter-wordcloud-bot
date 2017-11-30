@@ -63,9 +63,10 @@ class MyStreamListener(tweepy.StreamListener):
         if no_hit:
           my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
-          api.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
+          res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
+          if res == "Error":
+            raise Exception("Failed to tweet.")
 
-          LOGGER.info('-> Tweeted "%s"', my_reply)
         else:
           stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                         'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
@@ -122,19 +123,21 @@ class MyStreamListener(tweepy.StreamListener):
           my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
               tweet_username, query, str(len(searched_tweets)))  # Test
 
-          api.update_with_media(filename=file_path, status=my_reply,
-                                in_reply_to_status_id=tweet_id)
+          res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
+                      filename=file_path)
+          if res == "Error":
+            raise Exception("Failed to tweet.")
 
-          LOGGER.info('Tweeted "%s"', my_reply)
       except Exception as e:
         LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
         my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
 
-        api.update_status(
-            status=my_reply, in_reply_to_status_id=tweet_id)
+        res = reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                    status=my_reply)
+        if res == "Error":
+          raise Exception("Failed to tweet.")
 
-        LOGGER.info('Tweeted "%s"', my_reply)
     return
 
   def on_error(self, status_code):
@@ -192,6 +195,44 @@ def is_mention_or_reply_to_me(status):
 
   except Exception as e:
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+
+
+def reply(twi_api, in_reply_to_status_id, status, filename=None):
+  """
+  Reply with text, or with both text and an image
+
+  :param twi_api: Twitter API object (required)
+  :type twi_api: Twitter API object
+  :param int in_reply_to_status_id: The ID of an existing status that the updatez
+    is in reply to (required)
+  :param str status: The text of your status update (required)
+  :param str filename: The local path to image file to upload (optional)
+  :returns: "Error" if something goes wrong, otherwise None
+  :rtype: str or None
+
+  :Example:
+
+  >>> reply(twi_api=api, in_reply_to_status_id=in_reply_to_status_id,
+            status="text")
+  """
+  try:
+    # Reply with text
+    if filename is None:
+      twi_api.update_status(in_reply_to_status_id=in_reply_to_status_id,
+                            status=status)
+      LOGGER.info('-> Tweeted "%s"', status)
+
+    # Reply with both text and an image
+    else:
+      twi_api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                                status=status, filename=filename)
+      LOGGER.info('-> Tweeted "%s"', status)
+
+    return
+
+  except Exception as e:
+    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+    return "Error"
 
 
 if IS_TRAVIS_CI is True:
