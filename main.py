@@ -36,38 +36,28 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_text = str(status.text.encode('utf_8'))
         tweet_id = status.id
 
-        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
-        query_encoded = urllib.quote_plus(query)
-
         frequency = defaultdict(int)
 
-        MAX_TWEETS = 500
+        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
-        while True:
-          try:
-            LOGGER.info('Searching "%s"...', query)
-            searched_tweets = [status for status in tweepy.Cursor(
-                api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
-            break
-          except Exception as e:
-            is_429_too_many_requests_error = str(e).find("429") != -1
-            if is_429_too_many_requests_error:
-              LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
-              time.sleep(60)
-            else:
-              raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
+        max_tweets = 500
+
+        searched_tweets = search_tweets(
+          twi_api=api, query=query, max_tweets=max_tweets)
+        if searched_tweets == "Error":
+          raise Exception("Failed to search tweets.")
 
         LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
-        no_hit = len(searched_tweets) == 0
-        if no_hit:
+        # If the search didn't match any tweets, then tweeting that.
+        if len(searched_tweets) == 0:
           my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
 
           res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
           if res == "Error":
             raise Exception("Failed to tweet.")
+          return
 
-        else:
           stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
                         'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
                         'くださる', 'そう', 'せる', 'した', '思う', 'それ',
@@ -195,6 +185,45 @@ def is_mention_or_reply_to_me(status):
 
   except Exception as e:
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+
+
+def search_tweets(twi_api, query, max_tweets):
+  """
+  Search the tweets that match a search query and return them.
+
+  :param twi_api: Twitter API object (required)
+  :type twi_api: Twitter API obj
+  :param str query: A search query (required)
+  :param int max_tweets: The maximum search results limit (required)
+  :returns: "Error" if something goes wrong, otherwise a list of SearchResult objects
+  :rtype: list of SearchResult obj or str
+
+  :Example:
+  >>> search_tweets(twi_api=api, query="keyword", max_tweets=500)
+  """
+  try:
+    query_encoded = urllib.quote_plus(query)
+  except Exception as e:
+    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+    return "Error"
+
+  while True:
+    try:
+      LOGGER.info('Searching "%s"...', query)
+
+      result = [status for status in tweepy.Cursor(
+          twi_api.search, q=query_encoded, lang="ja").items(max_tweets)]
+
+      return result
+    except Exception as e:
+      # If the error is the 429 Too Many Requests error, then retrying in 1 minute.
+      if str(e).find("429") != -1:
+        LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
+
+        time.sleep(60)
+      else:
+        LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+        return "Error"
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
