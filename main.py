@@ -113,8 +113,8 @@ class MyStreamListener(tweepy.StreamListener):
         my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
             tweet_username, query, str(len(searched_tweets)))  # Test
 
-        res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
-                    filename=file_path)
+        res = reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                    status=my_reply, filename=file_path)
         if res == "Error":
           raise Exception("Failed to tweet.")
 
@@ -195,7 +195,8 @@ def search_tweets(twi_api, query, max_tweets):
   :type twi_api: Twitter API obj
   :param str query: A search query (required)
   :param int max_tweets: The maximum search results limit (required)
-  :returns: "Error" if something goes wrong, otherwise a list of SearchResult objects
+  :returns: "Error" if something goes wrong, otherwise a list of SearchResult
+    objects
   :rtype: list of SearchResult obj or str
 
   :Example:
@@ -216,7 +217,8 @@ def search_tweets(twi_api, query, max_tweets):
 
       return result
     except Exception as e:
-      # If the error is the 429 Too Many Requests error, then retrying in 1 minute.
+      # If the error is the 429 Too Many Requests error, then retrying in 1
+      # minute.
       if str(e).find("429") != -1:
         LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
 
