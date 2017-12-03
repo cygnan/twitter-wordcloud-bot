@@ -10,7 +10,7 @@ engines:
         enabled: false
 
   radon: 
-    enabled: true
+    enabled: false
     config: 
       python_version: "2"
   
