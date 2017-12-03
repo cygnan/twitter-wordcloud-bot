@@ -42,8 +42,8 @@ class MyStreamListener(tweepy.StreamListener):
 
         max_tweets = 500
 
-        searched_tweets = search_tweets(
-          twi_api=api, query=query, max_tweets=max_tweets)
+        searched_tweets = search_tweets(twi_api=api, query=query,
+                                        max_tweets=max_tweets)
         if searched_tweets == "Error":
           raise Exception("Failed to search tweets.")
 
@@ -84,8 +84,8 @@ class MyStreamListener(tweepy.StreamListener):
               if is_not_stop_word:
                 word_type = node.feature.split(",")[0]
                 word_decoded = node.surface.decode('utf-8')
-                word_original_form_decoded = node.feature.split(
-                  ",")[6].decode('utf-8')
+                word_original_form_decoded = node.feature.split(",")[6]
+                                             .decode('utf-8')
                 if word_type == "形容詞":
                   frequency[word_original_form_decoded] += 100
                 elif word_type == "動詞":
