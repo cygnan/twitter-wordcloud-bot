@@ -40,19 +40,19 @@ class MyStreamListener(tweepy.StreamListener):
 
         query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
-        max_tweets = 500
-
         searched_tweets = search_tweets(twi_api=api, query=query,
-                                        max_tweets=max_tweets)
+                                        max_tweets=500)
 
-        LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
+        LOGGER.info('-> %d tweets were found.', len(searched_tweets))
 
         # If the search didn't match any tweets, then tweeting that.
         # If len(searched_tweets) == 0, then searched_tweets returns False.
         if not searched_tweets:
-          my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
+          my_reply = "@{0} Your search - {1} - did not match any tweets. Try \
+                     different keywords.".format(tweet_username, query)
 
-          res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
+          res = reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                      status=my_reply)
           if res == "Error":
             raise Exception("Failed to tweet.")
           return
