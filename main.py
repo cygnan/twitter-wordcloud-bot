@@ -196,18 +196,13 @@ def search_tweets(twi_api, query, max_tweets):
   :type twi_api: Twitter API obj
   :param str query: A search query (required)
   :param int max_tweets: The maximum search results limit (required)
-  :returns: "Error" if something goes wrong, otherwise a list of SearchResult
-    objects
-  :rtype: list of SearchResult obj or str
+  :returns: A list of SearchResult objects
+  :rtype: list of SearchResult obj
 
   :Example:
   >>> search_tweets(twi_api=api, query="keyword", max_tweets=500)
   """
-  try:
-    query_encoded = urllib.quote_plus(query)
-  except Exception as e:
-    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-    return "Error"
+  query_encoded = urllib.quote_plus(query)
 
   while True:
     try:
@@ -225,8 +220,8 @@ def search_tweets(twi_api, query, max_tweets):
 
         time.sleep(60)
       else:
-        LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-        return "Error"
+        raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
+                                                e))
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
