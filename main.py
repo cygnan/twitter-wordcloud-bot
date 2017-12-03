@@ -211,15 +211,14 @@ def search_tweets(twi_api, query, max_tweets):
 
       return result
     except Exception as e:
-      # If the error is the 429 Too Many Requests error, then retrying in 1
-      # minute.
-      if str(e).find("429") != -1:
-        LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
-
-        time.sleep(60)
-      else:
+      # If the error is not the 429 Too Many Requests error, raise an error.
+      # Otherwise, retrying in 1 minute.
+      if str(e).find("429") == -1:
         raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
                                                 e))
+
+      LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
+      time.sleep(60)
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
