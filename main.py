@@ -44,8 +44,6 @@ class MyStreamListener(tweepy.StreamListener):
 
         searched_tweets = search_tweets(twi_api=api, query=query,
                                         max_tweets=max_tweets)
-        if searched_tweets == "Error":
-          raise Exception("Failed to search tweets.")
 
         LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
 
