@@ -11,8 +11,6 @@ engines:
 
   radon: 
     enabled: false
-    config: 
-      python_version: "2"
   
   duplication:
     enabled: true
