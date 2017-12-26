@@ -36,97 +36,86 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_text = str(status.text.encode('utf_8'))
         tweet_id = status.id
 
-        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
-        query_encoded = urllib.quote_plus(query)
-
         frequency = defaultdict(int)
 
-        MAX_TWEETS = 500
+        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
-        while True:
-          try:
-            LOGGER.info('Searching "%s"...', query)
-            searched_tweets = [status for status in tweepy.Cursor(
-                api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
-            break
-          except Exception as e:
-            is_429_too_many_requests_error = str(e).find("429") != -1
-            if is_429_too_many_requests_error:
-              LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
-              time.sleep(60)
-            else:
-              raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
+        searched_tweets = search_tweets(twi_api=api, query=query,
+                                        max_tweets=500)
 
-        LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
+        LOGGER.info('-> %d tweets were found.', len(searched_tweets))
 
-        no_hit = len(searched_tweets) == 0
-        if no_hit:
-          my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
+        # If the search didn't match any tweets, then tweeting that.
+        # If len(searched_tweets) == 0, then searched_tweets returns False.
+        if not searched_tweets:
+          my_reply = "@{0} Your search - {1} - did not match any tweets. Try \
+                     different keywords.".format(tweet_username, query)
 
-          res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
+          res = reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                      status=my_reply)
           if res == "Error":
             raise Exception("Failed to tweet.")
+          return
 
-        else:
-          stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
-                        'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                        'くださる', 'そう', 'せる', 'した', '思う', 'それ',
-                        'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
-                        'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                        'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
-                        '@', 'http', 'https', '.', ':', '/', '//', '://']
+        stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
+                      'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
+                      'くださる', 'そう', 'せる', 'した', '思う', 'それ',
+                      'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
+                      'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
+                      'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
+                      '@', 'http', 'https', '.', ':', '/', '//', '://']
+
+        with MeCab() as nm:
+          for node in nm.parse(query, as_nodes=True):
+            word = node.surface
+            stop_words.append(word)
+
+        LOGGER.info("Doing morphological analysis using MeCab...")
+
+        for tweet in searched_tweets:
+          text = str(tweet.text.encode("utf-8"))
 
           with MeCab() as nm:
-            for node in nm.parse(query, as_nodes=True):
+            for node in nm.parse(text, as_nodes=True):
               word = node.surface
-              stop_words.append(word)
 
-          LOGGER.info("Doing morphological analysis using MeCab...")
+              is_not_stop_word = word not in stop_words
+              if is_not_stop_word:
+                word_type = node.feature.split(",")[0]
+                word_decoded = node.surface.decode('utf-8')
+                word_original_form_decoded = node.feature.split(",")[6].decode(
+                    'utf-8')
+                if word_type == "形容詞":
+                  frequency[word_original_form_decoded] += 100
+                elif word_type == "動詞":
+                  frequency[word_original_form_decoded] += 1
+                elif word_type in ["名詞", "副詞"]:
+                  frequency[word_decoded] += 1
 
-          for tweet in searched_tweets:
-            text = str(tweet.text.encode("utf-8"))
+        LOGGER.info("-> Done.")
 
-            with MeCab() as nm:
-              for node in nm.parse(text, as_nodes=True):
-                word = node.surface
+        font_path = "rounded-mplus-1p-bold.ttf"
 
-                is_not_stop_word = word not in stop_words
-                if is_not_stop_word:
-                  word_type = node.feature.split(",")[0]
-                  word_decoded = node.surface.decode('utf-8')
-                  word_original_form_decoded = node.feature.split(
-                    ",")[6].decode('utf-8')
-                  if word_type == "形容詞":
-                    frequency[word_original_form_decoded] += 100
-                  elif word_type == "動詞":
-                    frequency[word_original_form_decoded] += 1
-                  elif word_type in ["名詞", "副詞"]:
-                    frequency[word_decoded] += 1
+        wordcloud = WordCloud(background_color="white", width=900,
+                              height=450, font_path=font_path,
+                              min_font_size=12)
 
-          LOGGER.info("-> Done.")
+        LOGGER.info("Generating a wordcloud image...")
 
-          font_path = "rounded-mplus-1p-bold.ttf"
+        wordcloud_image = wordcloud.generate_from_frequencies(
+            frequencies=frequency)
 
-          wordcloud = WordCloud(background_color="white", width=900,
-                                height=450, font_path=font_path,
-                                min_font_size=12)
+        file_path = "/tmp/{0}.png".format(str(tweet_id))
+        wordcloud_image.to_file(file_path)
+        LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
 
-          LOGGER.info("Generating a wordcloud image...")
+        my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
+            tweet_username, query, str(len(searched_tweets)))  # Test
 
-          wordcloud_image = wordcloud.generate_from_frequencies(
-              frequencies=frequency)
-
-          file_path = "/tmp/{0}.png".format(str(tweet_id))
-          wordcloud_image.to_file(file_path)
-          LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
-
-          my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-              tweet_username, query, str(len(searched_tweets)))  # Test
-
-          res = reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
-                      filename=file_path)
-          if res == "Error":
-            raise Exception("Failed to tweet.")
+        res = reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                    status=my_reply, filename=file_path)
+        if res == "Error":
+          raise Exception("Failed to tweet.")
 
       except Exception as e:
         LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
@@ -195,6 +184,41 @@ def is_mention_or_reply_to_me(status):
 
   except Exception as e:
     LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+
+
+def search_tweets(twi_api, query, max_tweets):
+  """
+  Search the tweets that match a search query and return them.
+
+  :param twi_api: Twitter API object (required)
+  :type twi_api: Twitter API obj
+  :param str query: A search query (required)
+  :param int max_tweets: The maximum search results limit (required)
+  :returns: A list of SearchResult objects
+  :rtype: list of SearchResult obj
+
+  :Example:
+  >>> search_tweets(twi_api=api, query="keyword", max_tweets=500)
+  """
+  query_encoded = urllib.quote_plus(query)
+
+  while True:
+    try:
+      LOGGER.info('Searching "%s"...', query)
+
+      result = [status for status in tweepy.Cursor(
+          twi_api.search, q=query_encoded, lang="ja").items(max_tweets)]
+
+      return result
+    except Exception as e:
+      # If the error is not the 429 Too Many Requests error, raise an error.
+      # Otherwise, retrying in 1 minute.
+      if str(e).find("429") == -1:
+        raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
+                                                e))
+
+      LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
+      time.sleep(60)
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
