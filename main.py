@@ -36,8 +36,6 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_text = str(status.text.encode('utf_8'))
         tweet_id = status.id
 
-        frequency = defaultdict(int)
-
         query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
         searched_tweets = search_tweets(twi_api=api, query=query,
@@ -54,42 +52,8 @@ class MyStreamListener(tweepy.StreamListener):
           reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
           return
 
-        stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
-                      'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                      'くださる', 'そう', 'せる', 'した', '思う', 'それ',
-                      'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
-                      'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                      'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
-                      '@', 'http', 'https', '.', ':', '/', '//', '://']
-
-        with MeCab() as nm:
-          for node in nm.parse(query, as_nodes=True):
-            word = node.surface
-            stop_words.append(word)
-
-        LOGGER.info("Doing morphological analysis using MeCab...")
-
-        for tweet in searched_tweets:
-          text = str(tweet.text.encode("utf-8"))
-
-          with MeCab() as nm:
-            for node in nm.parse(text, as_nodes=True):
-              word = node.surface
-
-              is_not_stop_word = word not in stop_words
-              if is_not_stop_word:
-                word_type = node.feature.split(",")[0]
-                word_decoded = node.surface.decode('utf-8')
-                word_original_form_decoded = node.feature.split(",")[6].decode(
-                    'utf-8')
-                if word_type == "形容詞":
-                  frequency[word_original_form_decoded] += 100
-                elif word_type == "動詞":
-                  frequency[word_original_form_decoded] += 1
-                elif word_type in ["名詞", "副詞"]:
-                  frequency[word_decoded] += 1
-
-        LOGGER.info("-> Done.")
+        frequency = do_morphological_analysis(searched_tweets=searched_tweets,
+                                              query=query)
 
         font_path = "rounded-mplus-1p-bold.ttf"
 
@@ -211,6 +175,67 @@ def search_tweets(twi_api, query, max_tweets):
 
       LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
       time.sleep(60)
+
+
+def do_morphological_analysis(searched_tweets, query):
+  """
+  Do morphological analysis using MeCab, and return a defaultdict of word
+  frequency.
+
+  :param searched_tweets: A list of SearchResult objects (required)
+  :type searched_tweets: list of SearchResult obj
+  :param str query: A search query (required)
+  :return: A defaultdict of word frequency
+  :rtype: defaultdict
+
+  :Example:
+  >>> frequency = do_morphological_analysis(searched_tweets=searched_tweets,
+                                            query=query)
+  """
+  stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと', 'これ', 'さん',
+                'して', 'くれる', 'やる', 'くださる', 'そう', 'せる', 'した', '思う',
+                'それ', 'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を', 'は', 'の',
+                'が', 'と', 'た', 'し', 'で', 'ない', 'も', 'な', 'い', 'か', 'ので',
+                'よう', '', 'RT', '@', 'http', 'https', '.', ':', '/', '//',
+                '://']
+
+  # Append the query itself to stop words.
+  with MeCab() as nm:
+    for node in nm.parse(query, as_nodes=True):
+      word = node.surface
+      stop_words.append(word)
+
+  LOGGER.info("Doing morphological analysis using MeCab...")
+
+  frequency = defaultdict(int)
+
+  # Do morphological analysis using MeCab.
+  for tweet in searched_tweets:
+    text = str(tweet.text.encode("utf-8"))
+
+    with MeCab() as nm:
+      for node in nm.parse(text, as_nodes=True):
+        word = node.surface
+
+        # If the word is a stop word, then skipping.
+        if word in stop_words:
+          continue
+
+        word_type = node.feature.split(",")[0]
+        word_decoded = node.surface.decode('utf-8')
+        word_original_form_decoded = node.feature.split(",")[6].decode('utf-8')
+
+        # If the word is adjective or verb, then add its original form to dict.
+        if word_type == "形容詞":
+          frequency[word_original_form_decoded] += 100
+        elif word_type == "動詞":
+          frequency[word_original_form_decoded] += 1
+        elif word_type in ["名詞", "副詞"]:
+          frequency[word_decoded] += 1
+
+  LOGGER.info("-> Done.")
+
+  return frequency
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
