@@ -205,6 +205,11 @@ def get_surfaces(word):
 class Frequencies:
   """
   A class to generate a frequencies dict.
+
+  :Example:
+  >>> frequencies_obj = Frequencies()
+  >>> frequencies_obj.add(node)
+  >>> return frequencies_obj.dict
   """
   def __init__(self):
     """
