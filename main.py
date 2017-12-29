@@ -199,8 +199,37 @@ def get_surfaces(word):
   :Example:
   >>> query_surfaces = get_surfaces(query)
   """
-
   return [node.surface for node in MeCab().parse(word, as_nodes=True)]
+
+
+class Frequencies:
+  """
+  A class to generate a frequencies dict.
+  """
+  def __init__(self):
+    """
+    A method to initialize a object.
+    """
+    self.dict = defaultdict(int)
+
+  def add(self, node):
+    """
+    Add text or its end-form to dict.
+
+    :param node: A MeCabNode instance
+    :type node: MeCabNode instance obj
+    """
+    parts_of_speech = node.feature.split(",")[0]
+    word_decoded = node.surface.decode("utf-8")
+    word_end_form_decoded = node.feature.split(",")[6].decode("utf-8")
+
+    # If the word is adjective or verb, then add its end-form to dict.
+    if parts_of_speech == "形容詞":
+      self.dict[word_end_form_decoded] += 100
+    elif parts_of_speech == "動詞":
+      self.dict[word_end_form_decoded] += 1
+    elif parts_of_speech in ["名詞", "副詞"]:
+      self.dict[word_decoded] += 1
 
 
 def get_words_frequencies(searched_tweets, stop_words):
@@ -225,28 +254,19 @@ def get_words_frequencies(searched_tweets, stop_words):
     [str(tweet.text.encode("utf-8")) for tweet in searched_tweets]
   )
 
-  frequencies = defaultdict(int)
+  frequencies_obj = Frequencies()
 
   # Do morphological analysis using MeCab.
   for node in MeCab().parse(text, as_nodes=True):
-    parts_of_speech = node.feature.split(",")[0]
-    word_decoded = node.surface.decode("utf-8")
-    word_end_form_decoded = node.feature.split(",")[6].decode("utf-8")
-
     # If the word is a stop word, then skipping.
     if node.surface in stop_words:
-      pass
-    # If the word is adjective or verb, then add its end-form to dict.
-    elif parts_of_speech == "形容詞":
-      frequencies[word_end_form_decoded] += 100
-    elif parts_of_speech == "動詞":
-      frequencies[word_end_form_decoded] += 1
-    elif parts_of_speech in ["名詞", "副詞"]:
-      frequencies[word_decoded] += 1
+      continue
+
+    frequencies_obj.add(node)
 
   LOGGER.info("-> Done.")
 
-  return frequencies
+  return frequencies_obj.dict
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
