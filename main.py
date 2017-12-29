@@ -263,7 +263,7 @@ def get_words_frequencies(searched_tweets, stop_words):
 
   # Do morphological analysis using MeCab.
   for node in MeCab().parse(text, as_nodes=True):
-    # If the word is a stop word, then skipping.
+    # If the word is a stop word, then skipped.
     if node.surface in stop_words:
       continue
 
