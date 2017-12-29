@@ -209,29 +209,32 @@ def do_morphological_analysis(searched_tweets, query):
 
   frequency = defaultdict(int)
 
-  # Do morphological analysis using MeCab.
+  # Concatenate tweets text with spaces
+  text_array = []
   for tweet in searched_tweets:
-    text = str(tweet.text.encode("utf-8"))
+    text_array.append(str(tweet.text.encode("utf-8")))
+  text = " ".join(text_array)
 
-    with MeCab() as nm:
-      for node in nm.parse(text, as_nodes=True):
-        word = node.surface
+  # Do morphological analysis using MeCab.
+  with MeCab() as nm:
+    for node in nm.parse(text, as_nodes=True):
+      word = node.surface
 
-        # If the word is a stop word, then skipping.
-        if word in stop_words:
-          continue
+      # If the word is a stop word, then skipping.
+      if word in stop_words:
+        continue
 
-        word_type = node.feature.split(",")[0]
-        word_decoded = node.surface.decode('utf-8')
-        word_original_form_decoded = node.feature.split(",")[6].decode('utf-8')
+      word_type = node.feature.split(",")[0]
+      word_decoded = node.surface.decode('utf-8')
+      word_original_form_decoded = node.feature.split(",")[6].decode('utf-8')
 
-        # If the word is adjective or verb, then add its original form to dict.
-        if word_type == "形容詞":
-          frequency[word_original_form_decoded] += 100
-        elif word_type == "動詞":
-          frequency[word_original_form_decoded] += 1
-        elif word_type in ["名詞", "副詞"]:
-          frequency[word_decoded] += 1
+      # If the word is adjective or verb, then add its original form to dict.
+      if word_type == "形容詞":
+        frequency[word_original_form_decoded] += 100
+      elif word_type == "動詞":
+        frequency[word_original_form_decoded] += 1
+      elif word_type in ["名詞", "副詞"]:
+        frequency[word_decoded] += 1
 
   LOGGER.info("-> Done.")
 
