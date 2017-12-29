@@ -61,7 +61,7 @@ class MyStreamListener(tweepy.StreamListener):
 
         # Append the query itself to stop words.
         query_surfaces = get_surfaces(query)
-        stop_words.append(query_surfaces)
+        stop_words.extend(query_surfaces)
 
         frequencies = get_words_frequencies(searched_tweets=searched_tweets,
                                             stop_words=stop_words)
