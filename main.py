@@ -199,14 +199,8 @@ def get_surfaces(word):
   :Example:
   >>> query_surfaces = get_surfaces(query)
   """
-  surfaces = []
 
-  with MeCab() as nm:
-    for node in nm.parse(word, as_nodes=True):
-      surface = node.surface
-      surfaces.append(surface)
-
-  return surfaces
+  return [node.surface for node in MeCab().parse(word, as_nodes=True)]
 
 
 def get_words_frequencies(searched_tweets, stop_words):
@@ -226,33 +220,32 @@ def get_words_frequencies(searched_tweets, stop_words):
   """
   LOGGER.info("Doing morphological analysis using MeCab...")
 
-  frequencies = defaultdict(int)
-
   # Concatenate tweets text with spaces
   text = " ".join(
     [str(tweet.text.encode("utf-8")) for tweet in searched_tweets]
   )
 
+  frequencies = defaultdict(int)
+
   # Do morphological analysis using MeCab.
-  with MeCab() as nm:
-    for node in nm.parse(text, as_nodes=True):
-      surface = node.surface
+  for node in MeCab().parse(text, as_nodes=True):
+    surface = node.surface
 
-      # If the word is a stop word, then skipping.
-      if surface in stop_words:
-        continue
+    # If the word is a stop word, then skipping.
+    if surface in stop_words:
+      continue
 
-      parts_of_speech = node.feature.split(",")[0]
-      word_decoded = node.surface.decode("utf-8")
-      word_original_form_decoded = node.feature.split(",")[6].decode("utf-8")
+    parts_of_speech = node.feature.split(",")[0]
+    word_decoded = node.surface.decode("utf-8")
+    word_end_form_decoded = node.feature.split(",")[6].decode("utf-8")
 
-      # If the word is adjective or verb, then add its original form to dict.
-      if parts_of_speech == "形容詞":
-        frequencies[word_original_form_decoded] += 100
-      elif parts_of_speech == "動詞":
-        frequencies[word_original_form_decoded] += 1
-      elif parts_of_speech in ["名詞", "副詞"]:
-        frequencies[word_decoded] += 1
+    # If the word is adjective or verb, then add its end-form to dict.
+    if parts_of_speech == "形容詞":
+      frequencies[word_end_form_decoded] += 100
+    elif parts_of_speech == "動詞":
+      frequencies[word_end_form_decoded] += 1
+    elif parts_of_speech in ["名詞", "副詞"]:
+      frequencies[word_decoded] += 1
 
   LOGGER.info("-> Done.")
 
