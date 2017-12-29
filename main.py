@@ -229,10 +229,9 @@ def get_words_frequencies(searched_tweets, stop_words):
   frequencies = defaultdict(int)
 
   # Concatenate tweets text with spaces
-  text_array = []
-  for tweet in searched_tweets:
-    text_array.append(str(tweet.text.encode("utf-8")))
-  text = " ".join(text_array)
+  text = " ".join(
+    [str(tweet.text.encode("utf-8")) for tweet in searched_tweets]
+  )
 
   # Do morphological analysis using MeCab.
   with MeCab() as nm:
@@ -244,8 +243,8 @@ def get_words_frequencies(searched_tweets, stop_words):
         continue
 
       parts_of_speech = node.feature.split(",")[0]
-      word_decoded = node.surface.decode('utf-8')
-      word_original_form_decoded = node.feature.split(",")[6].decode('utf-8')
+      word_decoded = node.surface.decode("utf-8")
+      word_original_form_decoded = node.feature.split(",")[6].decode("utf-8")
 
       # If the word is adjective or verb, then add its original form to dict.
       if parts_of_speech == "形容詞":
