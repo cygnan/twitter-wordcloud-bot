@@ -144,7 +144,6 @@ def is_mention_or_reply_to_me(status):
             return False
 
         tweet_to = str(status.in_reply_to_screen_name)
-        tweet_id = status.id
 
         # If the tweet is neither a mention nor a reply to me, then skipped.
         if tweet_to != MY_TWITTER_USERNAME:
