@@ -71,7 +71,8 @@ class MyStreamListener(tweepy.StreamListener):
         image_path = "/tmp/{0}.png".format(str(tweet_id))
 
         # Generate a wordcloud image.
-        generate_wordcloud_image(frequencies=frequencies, image_path=image_path)
+        generate_wordcloud_image(frequencies=frequencies,
+                                 image_path=image_path)
 
         my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
           tweet_username, query, str(len(searched_tweets)))
