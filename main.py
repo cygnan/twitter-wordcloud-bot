@@ -302,9 +302,9 @@ def generate_wordcloud_image(frequencies, image_path):
   """
   Generate a wordcloud image from a defaultdict of words frequencies.
 
-  :param frequencies: A defaultdict of words frequencies
+  :param frequencies: A defaultdict of words frequencies (required)
   :type frequencies: defaultdict
-  :param str image_path: The wordcloud image file path
+  :param str image_path: The wordcloud image file path (required)
 
   :Example:
   >>> generate_wordcloud_image(frequencies=frequencies, image_path=image_path)
