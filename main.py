@@ -63,29 +63,21 @@ class MyStreamListener(tweepy.StreamListener):
         query_surfaces = get_surfaces(query)
         stop_words.extend(query_surfaces)
 
+        # Do morphological analysis using MeCab, and create a defaultdict of
+        # words frequencies.
         frequencies = get_words_frequencies(searched_tweets=searched_tweets,
                                             stop_words=stop_words)
 
-        font_path = "rounded-mplus-1p-bold.ttf"
+        image_path = "/tmp/{0}.png".format(str(tweet_id))
 
-        wordcloud = WordCloud(background_color="white", width=900,
-                              height=450, font_path=font_path,
-                              min_font_size=12)
-
-        LOGGER.info("Generating a wordcloud image...")
-
-        wordcloud_image = wordcloud.generate_from_frequencies(
-          frequencies=frequencies)
-
-        file_path = "/tmp/{0}.png".format(str(tweet_id))
-        wordcloud_image.to_file(file_path)
-        LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
+        # Generate a wordcloud image.
+        generate_wordcloud_image(frequencies=frequencies, image_path=image_path)
 
         my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-            tweet_username, query, str(len(searched_tweets)))  # Test
+          tweet_username, query, str(len(searched_tweets)))
 
         reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
-              filename=file_path)
+              filename=image_path)
 
       except Exception as e:
         LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
@@ -303,6 +295,31 @@ def reply(twi_api, in_reply_to_status_id, status, filename=None):
     LOGGER.info('-> Tweeted "%s"', status)
 
   return
+
+
+def generate_wordcloud_image(frequencies, image_path):
+  """
+  Generate a wordcloud image from a defaultdict of words frequencies.
+
+  :param frequencies: A defaultdict of words frequencies
+  :type frequencies: defaultdict
+  :param str image_path: The wordcloud image file path
+
+  :Example:
+  >>> generate_wordcloud_image(frequencies=frequencies, image_path=image_path)
+  """
+  font_path = "rounded-mplus-1p-bold.ttf"
+
+  wordcloud = WordCloud(background_color="white", width=900, height=450,
+                        font_path=font_path, min_font_size=12)
+
+  LOGGER.info("Generating a wordcloud image...")
+
+  image = wordcloud.generate_from_frequencies(frequencies=frequencies)
+
+  image.to_file(filename=image_path)
+
+  LOGGER.info('-> Saved a wordcloud image to "%s"', image_path)
 
 
 if IS_TRAVIS_CI is True:
