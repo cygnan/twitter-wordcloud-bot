@@ -30,64 +30,66 @@ if not IS_TRAVIS_CI:
 
 class MyStreamListener(tweepy.StreamListener):
   def on_status(self, status):
-    if is_mention_or_reply_to_me(status):
-      try:
-        tweet_username = str(status.user.screen_name)
-        tweet_text = str(status.text.encode('utf_8'))
-        tweet_id = status.id
+    if not is_mention_or_reply_to_me(status):
+      return
 
-        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
+    try:
+      tweet_username = str(status.user.screen_name)
+      tweet_text = str(status.text.encode('utf_8'))
+      tweet_id = status.id
 
-        searched_tweets = search_tweets(twi_api=api, query=query,
-                                        max_tweets=500)
+      query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
-        LOGGER.info('-> %d tweets were found.', len(searched_tweets))
+      searched_tweets = search_tweets(twi_api=api, query=query,
+                                      max_tweets=500)
 
-        # If the search didn't match any tweets, then tweeting that.
-        # If len(searched_tweets) == 0, then searched_tweets returns False.
-        if not searched_tweets:
-          my_reply = "@{0} Your search - {1} - did not match any tweets. Try \
-                     different keywords.".format(tweet_username, query)
+      LOGGER.info('-> %d tweets were found.', len(searched_tweets))
 
-          reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
-          return
-
-        stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと', 'これ',
-                      'さん', 'して', 'くれる', 'やる', 'くださる', 'そう', 'せる',
-                      'した', '思う', 'それ', 'ここ', 'ちゃん', 'くん', '', 'て', 'に',
-                      'を', 'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない', 'も',
-                      'な', 'い', 'か', 'ので', 'よう', '', 'RT', '@', 'http',
-                      'https', '.', ':', '/', '//', '://']
-
-        # Append the query itself to stop words.
-        query_surfaces = get_surfaces(query)
-        stop_words.extend(query_surfaces)
-
-        # Create words list.
-        words = [str(tweet.text) for tweet in searched_tweets]
-
-        # Do morphological analysis using MeCab, and create a defaultdict of
-        # words frequencies.
-        frequencies = get_words_frequencies(words=words, stop_words=stop_words)
-
-        image_path = "/tmp/{0}.png".format(str(tweet_id))
-
-        # Generate a wordcloud image.
-        generate_wordcloud_image(frequencies=frequencies,
-                                 image_path=image_path)
-
-        my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-          tweet_username, query, str(len(searched_tweets)))
-
-        reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
-              filename=image_path)
-
-      except Exception as e:
-        LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-
-        my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
+      # If the search didn't match any tweets, then tweeting that.
+      # If len(searched_tweets) == 0, then searched_tweets returns False.
+      if not searched_tweets:
+        my_reply = "@{0} Your search - {1} - did not match any tweets. Try \
+                   different keywords.".format(tweet_username, query)
 
         reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
+        return
+
+      stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと', 'これ',
+                    'さん', 'して', 'くれる', 'やる', 'くださる', 'そう', 'せる',
+                    'した', '思う', 'それ', 'ここ', 'ちゃん', 'くん', '', 'て', 'に',
+                    'を', 'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない', 'も',
+                    'な', 'い', 'か', 'ので', 'よう', '', 'RT', '@', 'http',
+                    'https', '.', ':', '/', '//', '://']
+
+      # Append the query itself to stop words.
+      query_surfaces = get_surfaces(query)
+      stop_words.extend(query_surfaces)
+
+      # Create words list.
+      words = [str(tweet.text) for tweet in searched_tweets]
+
+      # Do morphological analysis using MeCab, and create a defaultdict of
+      # words frequencies.
+      frequencies = get_words_frequencies(words=words, stop_words=stop_words)
+
+      image_path = "/tmp/{0}.png".format(str(tweet_id))
+
+      # Generate a wordcloud image.
+      generate_wordcloud_image(frequencies=frequencies,
+                               image_path=image_path)
+
+      my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
+        tweet_username, query, str(len(searched_tweets)))
+
+      reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
+            filename=image_path)
+
+    except Exception as e:
+      LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+
+      my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
+
+      reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
 
     return
 
