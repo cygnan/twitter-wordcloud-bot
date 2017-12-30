@@ -35,8 +35,8 @@ class MyStreamListener(tweepy.StreamListener):
             return
 
         try:
-            tweet_username = str(status.user.screen_name)
-            tweet_text = str(status.text.encode('utf_8'))
+            tweet_username = status.user.screen_name.encode('utf_8')
+            tweet_text = status.text.encode('utf_8')
             tweet_id = status.id
 
             query = tweet_text.split(" ", tweet_text.count("@"))[-1]
@@ -71,7 +71,7 @@ class MyStreamListener(tweepy.StreamListener):
             stop_words.extend(query_surfaces)
 
             # Create words list.
-            words = [str(tweet.text) for tweet in searched_tweets]
+            words = [tweet.text.encode("utf-8") for tweet in searched_tweets]
 
             # Do morphological analysis using MeCab, and create a defaultdict
             # of words frequencies.
@@ -127,8 +127,8 @@ def is_mention_or_reply_to_me(status):
     :rtype: bool
     """
     try:
-        tweet_username = str(status.user.screen_name)
-        tweet_text = str(status.text.encode('utf_8'))
+        tweet_username = status.user.screen_name.encode('utf_8')
+        tweet_text = status.text.encode('utf_8')
 
         LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
 
@@ -143,7 +143,7 @@ def is_mention_or_reply_to_me(status):
             LOGGER.info("-> Skipped (neither a mention nor a reply).")
             return False
 
-        tweet_to = str(status.in_reply_to_screen_name)
+        tweet_to = status.in_reply_to_screen_name.encode('utf_8')
 
         # If the tweet is neither a mention nor a reply to me, then skipped.
         if tweet_to != MY_TWITTER_USERNAME:
@@ -249,8 +249,10 @@ def get_words_frequencies(words, stop_words):
     """Do morphological analysis using MeCab, and return a defaultdict of words
     frequencies.
 
-    :param list words: A list of word (required)
-    :param list stop_words: Stop words (required)
+    :param words: A list of word (required)
+    :type words: list of str
+    :param stop_words: Stop words (required)
+    :type stop_words: list of str
     :return: A defaultdict of words frequencies
     :rtype: defaultdict
 
@@ -259,11 +261,8 @@ def get_words_frequencies(words, stop_words):
     """
     LOGGER.info("Doing morphological analysis using MeCab...")
 
-    # UTF-8-encode words.
-    words_encoded = [str(word.encode("utf-8")) for word in words]
-
     # Concatenate words with spaces
-    text = " ".join(words_encoded)
+    text = " ".join(words)
 
     frequencies_obj = Frequencies()
 
@@ -343,7 +342,7 @@ api = certify()
 
 LOGGER.info("Authentication successful.")
 
-MY_TWITTER_USERNAME = str(api.me().screen_name)
+MY_TWITTER_USERNAME = api.me().screen_name.encode('utf_8')
 LOGGER.info("Hello @%s!", MY_TWITTER_USERNAME)
 
 try:
