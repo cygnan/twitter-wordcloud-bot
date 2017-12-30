@@ -156,6 +156,17 @@ def is_mention_or_reply_to_me(status):
         LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
 
+def raise_exception_if_not_429_too_many_requests(e):
+    """If the error is not the 429 Too Many Requests error, raise an error.
+    Otherwise, passing.
+
+    :param Exception e: A handled exception when using Tweepy (required)
+    """
+    if str(e).find("429") == -1:
+        raise Exception("[line {0}] {1}".format(sys.exc_info()[-1]
+                                                .tb_lineno, e))
+
+
 def search_tweets(twi_api, query, max_tweets):
     """Search the tweets that match a search query and return them.
 
@@ -179,12 +190,11 @@ def search_tweets(twi_api, query, max_tweets):
                 twi_api.search, q=query_encoded, lang="ja").items(max_tweets)]
 
             return result
+
         except Exception as e:
             # If the error is not the 429 Too Many Requests error, raise an
             # error. Otherwise, retrying in 1 minute.
-            if str(e).find("429") == -1:
-                raise Exception("[line {0}] {1}".format(sys.exc_info()[-1]
-                                                        .tb_lineno, e))
+            raise_exception_if_not_429_too_many_requests(e=e)
 
             LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
             time.sleep(60)
