@@ -87,7 +87,8 @@ class MyStreamListener(tweepy.StreamListener):
     except Exception as e:
       LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
 
-      my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
+      my_reply = "@{0} 500 Internal Server Error. Sorry, something went " \
+                 "wrong.".format(tweet_username)
 
       reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
 
