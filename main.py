@@ -36,8 +36,6 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_text = str(status.text.encode('utf_8'))
         tweet_id = status.id
 
-        frequency = defaultdict(int)
-
         query = tweet_text.split(" ", tweet_text.count("@"))[-1]
 
         searched_tweets = search_tweets(twi_api=api, query=query,
@@ -54,42 +52,19 @@ class MyStreamListener(tweepy.StreamListener):
           reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
           return
 
-        stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
-                      'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                      'くださる', 'そう', 'せる', 'した', '思う', 'それ',
-                      'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
-                      'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                      'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
-                      '@', 'http', 'https', '.', ':', '/', '//', '://']
+        stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある', 'こと', 'これ',
+                      'さん', 'して', 'くれる', 'やる', 'くださる', 'そう', 'せる',
+                      'した', '思う', 'それ', 'ここ', 'ちゃん', 'くん', '', 'て', 'に',
+                      'を', 'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない', 'も',
+                      'な', 'い', 'か', 'ので', 'よう', '', 'RT', '@', 'http',
+                      'https', '.', ':', '/', '//', '://']
 
-        with MeCab() as nm:
-          for node in nm.parse(query, as_nodes=True):
-            word = node.surface
-            stop_words.append(word)
+        # Append the query itself to stop words.
+        query_surfaces = get_surfaces(query)
+        stop_words.extend(query_surfaces)
 
-        LOGGER.info("Doing morphological analysis using MeCab...")
-
-        for tweet in searched_tweets:
-          text = str(tweet.text.encode("utf-8"))
-
-          with MeCab() as nm:
-            for node in nm.parse(text, as_nodes=True):
-              word = node.surface
-
-              is_not_stop_word = word not in stop_words
-              if is_not_stop_word:
-                word_type = node.feature.split(",")[0]
-                word_decoded = node.surface.decode('utf-8')
-                word_original_form_decoded = node.feature.split(",")[6].decode(
-                    'utf-8')
-                if word_type == "形容詞":
-                  frequency[word_original_form_decoded] += 100
-                elif word_type == "動詞":
-                  frequency[word_original_form_decoded] += 1
-                elif word_type in ["名詞", "副詞"]:
-                  frequency[word_decoded] += 1
-
-        LOGGER.info("-> Done.")
+        frequencies = get_words_frequencies(searched_tweets=searched_tweets,
+                                            stop_words=stop_words)
 
         font_path = "rounded-mplus-1p-bold.ttf"
 
@@ -100,7 +75,7 @@ class MyStreamListener(tweepy.StreamListener):
         LOGGER.info("Generating a wordcloud image...")
 
         wordcloud_image = wordcloud.generate_from_frequencies(
-            frequencies=frequency)
+          frequencies=frequencies)
 
         file_path = "/tmp/{0}.png".format(str(tweet_id))
         wordcloud_image.to_file(file_path)
@@ -211,6 +186,92 @@ def search_tweets(twi_api, query, max_tweets):
 
       LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
       time.sleep(60)
+
+
+def get_surfaces(word):
+  """
+  Do morphological analysis using MeCab, and return list of surfaces.
+
+  :param str word: A word whose surfaces we want to know (required)
+  :return: list of surfaces
+  :rtype: list
+
+  :Example:
+  >>> query_surfaces = get_surfaces(query)
+  """
+  return [node.surface for node in MeCab().parse(word, as_nodes=True)]
+
+
+class Frequencies:
+  """
+  A class to generate a frequencies dict.
+
+  :Example:
+  >>> frequencies_obj = Frequencies()
+  >>> frequencies_obj.add(node)
+  >>> return frequencies_obj.dict
+  """
+  def __init__(self):
+    """
+    A method to initialize a object.
+    """
+    self.dict = defaultdict(int)
+
+  def add(self, node):
+    """
+    Add text or its end-form to dict.
+
+    :param node: A MeCabNode instance
+    :type node: MeCabNode instance obj
+    """
+    parts_of_speech = node.feature.split(",")[0]
+    word_decoded = node.surface.decode("utf-8")
+    word_end_form_decoded = node.feature.split(",")[6].decode("utf-8")
+
+    # If the word is adjective or verb, then add its end-form to dict.
+    if parts_of_speech == "形容詞":
+      self.dict[word_end_form_decoded] += 100
+    elif parts_of_speech == "動詞":
+      self.dict[word_end_form_decoded] += 1
+    elif parts_of_speech in ["名詞", "副詞"]:
+      self.dict[word_decoded] += 1
+
+
+def get_words_frequencies(searched_tweets, stop_words):
+  """
+  Do morphological analysis using MeCab, and return a defaultdict of words
+  frequencies.
+
+  :param searched_tweets: A list of SearchResult objects (required)
+  :type searched_tweets: list of SearchResult obj
+  :param list stop_words: stop words (required)
+  :return: A defaultdict of words frequencies
+  :rtype: defaultdict
+
+  :Example:
+  >>> frequencies = get_words_frequencies(searched_tweets=searched_tweets,
+                                          stop_words=stop_words)
+  """
+  LOGGER.info("Doing morphological analysis using MeCab...")
+
+  # Concatenate tweets text with spaces
+  text = " ".join(
+    [str(tweet.text.encode("utf-8")) for tweet in searched_tweets]
+  )
+
+  frequencies_obj = Frequencies()
+
+  # Do morphological analysis using MeCab.
+  for node in MeCab().parse(text, as_nodes=True):
+    # If the word is a stop word, then skipped.
+    if node.surface in stop_words:
+      continue
+
+    frequencies_obj.add(node)
+
+  LOGGER.info("-> Done.")
+
+  return frequencies_obj.dict
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
