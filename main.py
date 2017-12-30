@@ -47,7 +47,8 @@ class MyStreamListener(tweepy.StreamListener):
             LOGGER.info('-> %d tweets were found.', len(searched_tweets))
 
             # If the search didn't match any tweets, then tweeting that.
-            # If len(searched_tweets) == 0, then searched_tweets returns False.
+            # Note: If len(searched_tweets) == 0, then searched_tweets returns
+            # False.
             if not searched_tweets:
                 my_reply = "@{0} Your search - {1} - did not match any tweet" \
                            "s. Try different keywords.".format(tweet_username,
@@ -86,6 +87,7 @@ class MyStreamListener(tweepy.StreamListener):
             my_reply = '@{0} Search results for "{1}" (about {2} tweets)'\
                 .format(tweet_username, query, str(len(searched_tweets)))
 
+            # Reply with the wordcloud image
             reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
                   filename=image_path)
 
@@ -105,8 +107,7 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 def certify():
-    """
-    Authenticate with Twitter using Tweepy and return Twitter API object.
+    """Authenticate with Twitter using Tweepy and return Twitter API object.
 
     :returns: Twitter API object
     :rtype: Twitter API object
@@ -118,10 +119,9 @@ def certify():
 
 
 def is_mention_or_reply_to_me(status):
-    """
-    Determine whether the tweet is a mention or a reply to me or not.
+    """Determine whether the tweet is a mention or a reply to me or not.
 
-    :param status: A tweet status
+    :param status: A tweet status (required)
     :type status: A tweet object
     :returns: True if the tweet is a mention or a reply to me, otherwise False
     :rtype: bool
@@ -157,8 +157,7 @@ def is_mention_or_reply_to_me(status):
 
 
 def search_tweets(twi_api, query, max_tweets):
-    """
-    Search the tweets that match a search query and return them.
+    """Search the tweets that match a search query and return them.
 
     :param twi_api: Twitter API object (required)
     :type twi_api: Twitter API obj
@@ -192,8 +191,7 @@ def search_tweets(twi_api, query, max_tweets):
 
 
 def get_surfaces(word):
-    """
-    Do morphological analysis using MeCab, and return list of surfaces.
+    """Do morphological analysis using MeCab, and return list of surfaces.
 
     :param str word: A word whose surfaces we want to know (required)
     :return: list of surfaces
@@ -206,8 +204,7 @@ def get_surfaces(word):
 
 
 class Frequencies:
-    """
-    A class to generate a frequencies dict.
+    """A class to generate a frequencies dict.
 
     :Example:
     >>> frequencies_obj = Frequencies()
@@ -215,16 +212,14 @@ class Frequencies:
     >>> return frequencies_obj.dict
     """
     def __init__(self):
-        """
-        A method to initialize a object.
+        """A method to initialize a object.
         """
         self.dict = defaultdict(int)
 
     def add(self, node):
-        """
-        Add text or its end-form to dict.
+        """Add text or its end-form to dict.
 
-        :param node: A MeCabNode instance
+        :param node: A MeCabNode instance (required)
         :type node: MeCabNode instance obj
         """
         parts_of_speech = node.feature.split(",")[0]
@@ -241,8 +236,7 @@ class Frequencies:
 
 
 def get_words_frequencies(words, stop_words):
-    """
-    Do morphological analysis using MeCab, and return a defaultdict of words
+    """Do morphological analysis using MeCab, and return a defaultdict of words
     frequencies.
 
     :param list words: A list of word (required)
@@ -277,13 +271,12 @@ def get_words_frequencies(words, stop_words):
 
 
 def reply(twi_api, in_reply_to_status_id, status, filename=None):
-    """
-    Reply with text, or with both text and an image
+    """Reply with text, or with both text and an image
 
     :param twi_api: Twitter API object (required)
     :type twi_api: Twitter API object
     :param int in_reply_to_status_id: The ID of an existing status that the
-    update is in reply to (required)
+                                      update is in reply to (required)
     :param str status: The text of your status update (required)
     :param str filename: The local path to image file to upload (optional)
 
@@ -308,11 +301,10 @@ def reply(twi_api, in_reply_to_status_id, status, filename=None):
 
 
 def generate_wordcloud_image(frequencies, image_path):
-    """
-    Generate a wordcloud image from a defaultdict of words frequencies.
+    """Generate a wordcloud image from a defaultdict of words frequencies.
 
-    :param frequencies: A defaultdict of words frequencies (required)
-    :type frequencies: defaultdict
+    :param defaultdict frequencies: A defaultdict of words frequencies
+                                    (required)
     :param str image_path: The wordcloud image file path (required)
 
     :Example:
