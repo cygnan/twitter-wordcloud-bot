@@ -63,10 +63,12 @@ class MyStreamListener(tweepy.StreamListener):
         query_surfaces = get_surfaces(query)
         stop_words.extend(query_surfaces)
 
+        # Create words list.
+        words = [str(tweet.text) for tweet in searched_tweets]
+
         # Do morphological analysis using MeCab, and create a defaultdict of
         # words frequencies.
-        frequencies = get_words_frequencies(searched_tweets=searched_tweets,
-                                            stop_words=stop_words)
+        frequencies = get_words_frequencies(words=words, stop_words=stop_words)
 
         image_path = "/tmp/{0}.png".format(str(tweet_id))
 
@@ -230,27 +232,26 @@ class Frequencies:
       self.dict[word_decoded] += 1
 
 
-def get_words_frequencies(searched_tweets, stop_words):
+def get_words_frequencies(words, stop_words):
   """
   Do morphological analysis using MeCab, and return a defaultdict of words
   frequencies.
 
-  :param searched_tweets: A list of SearchResult objects (required)
-  :type searched_tweets: list of SearchResult obj
-  :param list stop_words: stop words (required)
+  :param list words: A list of word (required)
+  :param list stop_words: Stop words (required)
   :return: A defaultdict of words frequencies
   :rtype: defaultdict
 
   :Example:
-  >>> frequencies = get_words_frequencies(searched_tweets=searched_tweets,
-                                          stop_words=stop_words)
+  >>> frequencies = get_words_frequencies(words=words, stop_words=stop_words)
   """
   LOGGER.info("Doing morphological analysis using MeCab...")
 
-  # Concatenate tweets text with spaces
-  text = " ".join(
-    [str(tweet.text.encode("utf-8")) for tweet in searched_tweets]
-  )
+  # UTF-8-encode words.
+  words_encoded = [str(word.encode("utf-8")) for word in words]
+
+  # Concatenate words with spaces
+  text = " ".join(words_encoded)
 
   frequencies_obj = Frequencies()
 
