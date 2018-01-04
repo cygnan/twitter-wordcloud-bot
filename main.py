@@ -226,8 +226,7 @@ class Frequencies:
     >>> return frequencies_obj.dict
     """
     def __init__(self):
-        """A method to initialize a object.
-        """
+        """A method to initialize a object."""
         self.dict = defaultdict(int)
 
     def add(self, node):
