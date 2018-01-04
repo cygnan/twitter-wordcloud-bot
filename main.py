@@ -183,7 +183,7 @@ def search_tweets(twi_api, query, max_tweets):
     :Example:
     >>> search_tweets(twi_api=api, query=u"keyword", max_tweets=500)
     """
-    query_encoded = urllib.quote_plus(query)
+    query_encoded = urllib.quote_plus(query.encode("utf_8")).decode("utf_8")
 
     while True:
         try:
