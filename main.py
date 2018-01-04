@@ -341,6 +341,7 @@ def generate_wordcloud_image(frequencies, image_path):
 
     LOGGER.info(u'-> Saved a wordcloud image to "%s"', image_path)
 
+
 def main():
     if IS_TRAVIS_CI:
         LOGGER.info(u"Travis CI build succeeded.")
