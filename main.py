@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(
 )
 LOGGER.setLevel(logging.DEBUG)
 
-IS_TRAVIS_CI = bool(len(sys.argv) == 2 and sys.argv[1] == "--travis")
+IS_TRAVIS_CI = len(sys.argv) == 2 and sys.argv[1] == "--travis"
 
 if not IS_TRAVIS_CI:
     CONSUMER_KEY = os.environ["CONSUMER_KEY"].decode("utf_8")
@@ -33,7 +33,7 @@ if not IS_TRAVIS_CI:
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
-        if not is_mention_or_reply_to_me(status):
+        if not is_mention_or_reply_to_me(api=self.api, status=status):
             return
 
         try:
@@ -43,7 +43,7 @@ class MyStreamListener(tweepy.StreamListener):
 
             query = tweet_text.split(u" ", tweet_text.count(u"@"))[-1]
 
-            searched_tweets = search_tweets(twi_api=api, query=query,
+            searched_tweets = search_tweets(api=self.api, query=query,
                                             max_tweets=500)
 
             LOGGER.info(u"-> %d tweets were found.", len(searched_tweets))
@@ -56,7 +56,7 @@ class MyStreamListener(tweepy.StreamListener):
                            u"ts. Try different keywords."\
                     .format(tweet_username, query)
 
-                reply(twi_api=api, in_reply_to_status_id=tweet_id,
+                reply(api=self.api, in_reply_to_status_id=tweet_id,
                       status=my_reply)
                 return
 
@@ -91,8 +91,8 @@ class MyStreamListener(tweepy.StreamListener):
                 .format(tweet_username, query, len(searched_tweets))
 
             # Reply with the wordcloud image
-            reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply,
-                  filename=image_path)
+            reply(api=self.api, in_reply_to_status_id=tweet_id,
+                  status=my_reply, filename=image_path)
 
         except Exception as e:
             LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
@@ -100,7 +100,8 @@ class MyStreamListener(tweepy.StreamListener):
             my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
                        u"went wrong.".format(tweet_username)
 
-            reply(twi_api=api, in_reply_to_status_id=tweet_id, status=my_reply)
+            reply(api=self.api, in_reply_to_status_id=tweet_id,
+                  status=my_reply)
 
         return
 
@@ -121,9 +122,11 @@ def certify():
     return api
 
 
-def is_mention_or_reply_to_me(status):
+def is_mention_or_reply_to_me(api, status):
     """Determine whether the tweet is a mention or a reply to me or not.
 
+    :param api: Twitter API object (required)
+    :type api: Twitter API obj
     :param status: A tweet status (required)
     :type status: A tweet object
     :returns: True if the tweet is a mention or a reply to me, otherwise False
@@ -132,6 +135,7 @@ def is_mention_or_reply_to_me(status):
     try:
         tweet_username = status.user.screen_name
         tweet_text = status.text
+        my_twitter_username = api.me().screen_name
 
         LOGGER.info(u'@%s: "%s"', tweet_username, tweet_text)
 
@@ -149,7 +153,7 @@ def is_mention_or_reply_to_me(status):
         tweet_to = status.in_reply_to_screen_name
 
         # If the tweet is neither a mention nor a reply to me, then skipped.
-        if tweet_to != MY_TWITTER_USERNAME:
+        if tweet_to != my_twitter_username:
             LOGGER.info(u"-> Skipped (neither a mention nor a reply to me).")
             return False
 
@@ -170,18 +174,18 @@ def raise_exception_if_not_429_too_many_requests(e):
                                                  e))
 
 
-def search_tweets(twi_api, query, max_tweets):
+def search_tweets(api, query, max_tweets):
     """Search the tweets that match a search query and return them.
 
-    :param twi_api: Twitter API object (required)
-    :type twi_api: Twitter API obj
+    :param api: Twitter API object (required)
+    :type api: Twitter API obj
     :param unicode query: A search query (required)
     :param int max_tweets: The maximum search results limit (required)
     :returns: A list of SearchResult objects
     :rtype: list of SearchResult obj
 
     :Example:
-    >>> search_tweets(twi_api=api, query=u"keyword", max_tweets=500)
+    >>> search_tweets(api=api, query=u"keyword", max_tweets=500)
     """
     query_encoded = urllib.quote_plus(query.encode("utf_8")).decode("utf_8")
 
@@ -190,7 +194,7 @@ def search_tweets(twi_api, query, max_tweets):
             LOGGER.info(u'Searching "%s"...', query)
 
             result = [status for status in tweepy.Cursor(
-                twi_api.search, q=query_encoded, lang=u"ja").items(max_tweets)]
+                api.search, q=query_encoded, lang=u"ja").items(max_tweets)]
 
             return result
 
@@ -282,11 +286,11 @@ def get_words_frequencies(words, stop_words):
     return frequencies_obj.dict
 
 
-def reply(twi_api, in_reply_to_status_id, status, filename=None):
+def reply(api, in_reply_to_status_id, status, filename=None):
     """Reply with text, or with both text and an image
 
-    :param twi_api: Twitter API object (required)
-    :type twi_api: Twitter API object
+    :param api: Twitter API object (required)
+    :type api: Twitter API object
     :param int in_reply_to_status_id: The ID of an existing status that the
                                       update is in reply to (required)
     :param unicode status: The text of your status update (required)
@@ -294,19 +298,19 @@ def reply(twi_api, in_reply_to_status_id, status, filename=None):
 
     :Example:
 
-    >>> reply(twi_api=api, in_reply_to_status_id=in_reply_to_status_id,
+    >>> reply(api=api, in_reply_to_status_id=in_reply_to_status_id,
               status=u"text")
     """
     # Reply with text
     if filename is None:
-        twi_api.update_status(in_reply_to_status_id=in_reply_to_status_id,
-                              status=status)
+        api.update_status(in_reply_to_status_id=in_reply_to_status_id,
+                          status=status)
         LOGGER.info(u'-> Tweeted "%s"', status)
 
     # Reply with both text and an image
     else:
-        twi_api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
-                                  status=status, filename=filename)
+        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                              status=status, filename=filename)
         LOGGER.info(u'-> Tweeted "%s"', status)
 
     return
@@ -337,25 +341,29 @@ def generate_wordcloud_image(frequencies, image_path):
     LOGGER.info(u'-> Saved a wordcloud image to "%s"', image_path)
 
 
-if IS_TRAVIS_CI is True:
-    LOGGER.info(u"Travis CI build succeeded.")
-    sys.exit()
+def main():
+    if IS_TRAVIS_CI:
+        LOGGER.info(u"Travis CI build succeeded.")
+        sys.exit()
 
-api = certify()
+    api = certify()
 
-LOGGER.info(u"Authentication successful.")
+    LOGGER.info(u"Authentication successful.")
 
-MY_TWITTER_USERNAME = api.me().screen_name
-LOGGER.info(u"Hello @%s!", MY_TWITTER_USERNAME)
+    my_twitter_username = api.me().screen_name
+    LOGGER.info(u"Hello @%s!", my_twitter_username)
 
-try:
-    MY_STREAM = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
+    try:
+        my_stream = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
 
-    LOGGER.info(u"Started streaming...")
+        LOGGER.info(u"Started streaming...")
+        my_stream.userstream()
 
-    MY_STREAM.userstream()
+        LOGGER.info(u"Finished streaming.")
 
-    LOGGER.info(u"Finished streaming.")
+    except Exception as e:
+        LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
-except Exception as e:
-    LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+
+if __name__ == "__main__":
+    main()
