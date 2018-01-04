@@ -95,8 +95,7 @@ class MyStreamListener(tweepy.StreamListener):
                   filename=image_path)
 
         except Exception as e:
-            LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno,
-                         e.decode("utf_8"))
+            LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
             my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
                        u"went wrong.".format(tweet_username)
@@ -157,8 +156,7 @@ def is_mention_or_reply_to_me(status):
         return True
 
     except Exception as e:
-        LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno,
-                     e.decode("utf_8"))
+        LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
 
 def raise_exception_if_not_429_too_many_requests(e):
@@ -167,9 +165,9 @@ def raise_exception_if_not_429_too_many_requests(e):
 
     :param Exception e: A handled exception when using Tweepy (required)
     """
-    if e.decode("utf_8").find(u"429") == -1:
+    if e.find(u"429") == -1:
         raise Exception(u"[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
-                                                 e.decode("utf_8")))
+                                                 e))
 
 
 def search_tweets(twi_api, query, max_tweets):
@@ -361,5 +359,4 @@ try:
     LOGGER.info(u"Finished streaming.")
 
 except Exception as e:
-    LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno,
-                 e.decode("utf-8"))
+    LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
