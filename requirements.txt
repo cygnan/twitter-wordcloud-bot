@@ -6,7 +6,7 @@
 #
 backports.functools-lru-cache==1.4
 certifi==2017.11.5        # via requests
-cffi==1.11.2              # via natto-py
+cffi==1.11.3              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
 idna==2.6                 # via requests
