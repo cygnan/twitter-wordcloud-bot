@@ -57,5 +57,5 @@ Tweet a search query to your Twitter bot. Then it will search tweets and reply w
 
 ## License
 
-Copyright © 2017 Cygnan  
+Copyright © 2017-2018 Cygnan  
 Licensed under the MIT License with the exception of a font, see [LICENSE.md](LICENSE.md).
