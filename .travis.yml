@@ -7,3 +7,6 @@ script:
 - python main.py --travis
 notifications:
   email: false
+branches:
+  only:
+  - master

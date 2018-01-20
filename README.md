@@ -1,15 +1,18 @@
 # twitter-wordcloud-bot
 
 [![Build Status](https://travis-ci.org/cygnan/twitter-wordcloud-bot.svg?branch=master)](https://travis-ci.org/cygnan/twitter-wordcloud-bot)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6302b1e5c142245d7d6a/maintainability)](https://codeclimate.com/github/cygnan/twitter-wordcloud-bot/maintainability)  
+[![Updates](https://pyup.io/repos/github/cygnan/twitter-wordcloud-bot/shield.svg)](https://pyup.io/repos/github/cygnan/twitter-wordcloud-bot/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/6302b1e5c142245d7d6a/maintainability)](https://codeclimate.com/github/cygnan/twitter-wordcloud-bot/maintainability)
+[![Hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)](https://houndci.com)
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.
 
 ## Requirements
 
-- A free Heroku account
+- A free Heroku account (No credit card required)
 - Heroku CLI
+- A Twitter account
 
 ## How to deploy to Heroku
 
@@ -55,5 +58,5 @@ Tweet a search query to your Twitter bot. Then it will search tweets and reply w
 
 ## License
 
-Copyright © 2017 Cygnan  
+Copyright © 2017-2018 Cygnan  
 Licensed under the MIT License with the exception of a font, see [LICENSE.md](LICENSE.md).

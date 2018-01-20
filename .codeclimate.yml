@@ -1,18 +1,9 @@
 engines:
   pep8:
     enabled: true
-    checks:
-      E501:
-        enabled: false
-      E111:
-        enabled: false
-      E114:
-        enabled: false
 
   radon: 
-    enabled: true
-    config: 
-      python_version: "2"
+    enabled: false
   
   duplication:
     enabled: true

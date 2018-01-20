@@ -13,206 +13,357 @@ import tweepy
 from natto import MeCab
 from wordcloud import WordCloud
 
-matplotlib.use('Agg')  # Set the filetype	to png
+# Set the filetype to png
+matplotlib.use(u"Agg")
 
-logging.basicConfig(format='[%(filename)s:%(lineno)d] %(message)s')
-LOGGER = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
+logging.basicConfig(format=u"[%(filename)s:%(lineno)d] %(message)s")
+LOGGER = logging.getLogger(
+    os.path.splitext(os.path.basename(__file__))[0].decode("utf-8")
+)
 LOGGER.setLevel(logging.DEBUG)
 
-IS_TRAVIS_CI = bool(len(sys.argv) == 2 and str(sys.argv[1]) == "--travis")
+IS_TRAVIS_CI = len(sys.argv) == 2 and sys.argv[1] == "--travis"
 
 if not IS_TRAVIS_CI:
-  CONSUMER_KEY = os.environ["CONSUMER_KEY"]
-  CONSUMER_SECRET = os.environ["CONSUMER_SECRET"]
-  ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
-  ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"]
+    CONSUMER_KEY = os.environ["CONSUMER_KEY"].decode("utf_8")
+    CONSUMER_SECRET = os.environ["CONSUMER_SECRET"].decode("utf_8")
+    ACCESS_TOKEN = os.environ["ACCESS_TOKEN"].decode("utf_8")
+    ACCESS_TOKEN_SECRET = os.environ["ACCESS_TOKEN_SECRET"].decode("utf_8")
 
 
 class MyStreamListener(tweepy.StreamListener):
-  def on_status(self, status):
-    if is_mention_or_reply_to_me(status):
-      try:
-        tweet_username = str(status.user.screen_name)
-        tweet_text = str(status.text.encode('utf_8'))
-        tweet_id = status.id
+    def on_status(self, status):
+        if not is_mention_or_reply_to_me(api=self.api, status=status):
+            return
 
-        query = tweet_text.split(" ", tweet_text.count("@"))[-1]
-        query_encoded = urllib.quote_plus(query)
+        try:
+            tweet_username = status.user.screen_name
+            tweet_text = status.text
+            tweet_id = status.id
 
-        frequency = defaultdict(int)
+            query = tweet_text.split(u" ", tweet_text.count(u"@"))[-1]
 
-        MAX_TWEETS = 500
+            searched_tweets = search_tweets(api=self.api, query=query,
+                                            max_tweets=500)
 
-        while True:
-          try:
-            LOGGER.info('Searching "%s"...', query)
-            searched_tweets = [status for status in tweepy.Cursor(
-                api.search, q=query_encoded, lang="ja").items(MAX_TWEETS)]
-            break
-          except Exception as e:
-            is_429_too_many_requests_error = str(e).find("429") != -1
-            if is_429_too_many_requests_error:
-              LOGGER.warning("429 Too Many Requests. Waiting 1 minute...")
-              time.sleep(60)
-            else:
-              raise Exception("[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno, e))
+            LOGGER.info(u"-> %d tweets were found.", len(searched_tweets))
 
-        LOGGER.info('-> %s tweets were found.', str(len(searched_tweets)))
+            # If the search didn't match any tweets, then tweeting that.
+            # Note: If len(searched_tweets) == 0, then searched_tweets returns
+            # False.
+            if not searched_tweets:
+                my_reply = u"@{0} Your search - {1} - did not match any twee" \
+                           u"ts. Try different keywords."\
+                    .format(tweet_username, query)
 
-        no_hit = len(searched_tweets) == 0
-        if no_hit:
-          my_reply = "@{0} Your search - {1} - did not match any tweets. Try different keywords.".format(tweet_username, query)
+                reply(api=self.api, in_reply_to_status_id=tweet_id,
+                      status=my_reply)
+                return
 
-          api.update_status(status=my_reply, in_reply_to_status_id=tweet_id)
+            stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
+                          u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
+                          u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
+                          u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
+                          u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
+                          u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
+                          u"@", u"http", u"https", u".", u":", u"/", u"//",
+                          u"://"]
 
-          LOGGER.info('-> Tweeted "%s"', my_reply)
-        else:
-          stop_words = ['てる', 'いる', 'なる', 'れる', 'する', 'ある',
-                        'こと', 'これ', 'さん', 'して', 'くれる', 'やる',
-                        'くださる', 'そう', 'せる', 'した', '思う', 'それ',
-                        'ここ', 'ちゃん', 'くん', '', 'て', 'に', 'を',
-                        'は', 'の', 'が', 'と', 'た', 'し', 'で', 'ない',
-                        'も', 'な', 'い', 'か', 'ので', 'よう', '', 'RT',
-                        '@', 'http', 'https', '.', ':', '/', '//', '://']
+            # Append the query itself to stop words.
+            query_surfaces = get_surfaces(query)
+            stop_words.extend(query_surfaces)
 
-          with MeCab() as nm:
-            for node in nm.parse(query, as_nodes=True):
-              word = node.surface
-              stop_words.append(word)
+            # Create words list.
+            words = [tweet.text for tweet in searched_tweets]
 
-          LOGGER.info("Doing morphological analysis using MeCab...")
+            # Do morphological analysis using MeCab, and create a defaultdict
+            # of words frequencies.
+            frequencies = get_words_frequencies(words=words,
+                                                stop_words=stop_words)
 
-          for tweet in searched_tweets:
-            text = str(tweet.text.encode("utf-8"))
+            image_path = u"/tmp/{0}.png".format(tweet_id)
 
-            with MeCab() as nm:
-              for node in nm.parse(text, as_nodes=True):
-                word = node.surface
+            # Generate a wordcloud image.
+            generate_wordcloud_image(frequencies=frequencies,
+                                     image_path=image_path)
 
-                is_not_stop_word = word not in stop_words
-                if is_not_stop_word:
-                  word_type = node.feature.split(",")[0]
-                  word_decoded = node.surface.decode('utf-8')
-                  word_original_form_decoded = node.feature.split(
-                    ",")[6].decode('utf-8')
-                  if word_type == "形容詞":
-                    frequency[word_original_form_decoded] += 100
-                  elif word_type == "動詞":
-                    frequency[word_original_form_decoded] += 1
-                  elif word_type in ["名詞", "副詞"]:
-                    frequency[word_decoded] += 1
+            my_reply = u'@{0} Search results for "{1}" (about {2} tweets)'\
+                .format(tweet_username, query, len(searched_tweets))
 
-          LOGGER.info("-> Done.")
+            # Reply with the wordcloud image
+            reply(api=self.api, in_reply_to_status_id=tweet_id,
+                  status=my_reply, filename=image_path)
 
-          font_path = "rounded-mplus-1p-bold.ttf"
+        except Exception as e:
+            LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
-          wordcloud = WordCloud(background_color="white", width=900,
-                                height=450, font_path=font_path,
-                                min_font_size=12)
+            my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
+                       u"went wrong.".format(tweet_username)
 
-          LOGGER.info("Generating a wordcloud image...")
+            reply(api=self.api, in_reply_to_status_id=tweet_id,
+                  status=my_reply)
 
-          wordcloud_image = wordcloud.generate_from_frequencies(
-              frequencies=frequency)
+        return
 
-          file_path = "/tmp/{0}.png".format(str(tweet_id))
-          wordcloud_image.to_file(file_path)
-          LOGGER.info('-> Saved a wordcloud image to "%s"', file_path)
-
-          my_reply = '@{0} Search results for "{1}" (about {2} tweets)'.format(
-              tweet_username, query, str(len(searched_tweets)))  # Test
-
-          api.update_with_media(filename=file_path, status=my_reply,
-                                in_reply_to_status_id=tweet_id)
-
-          LOGGER.info('Tweeted "%s"', my_reply)
-      except Exception as e:
-        LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
-
-        my_reply = "@{0} 500 Internal Server Error. Sorry, something went wrong.".format(tweet_username)
-
-        api.update_status(
-            status=my_reply, in_reply_to_status_id=tweet_id)
-
-        LOGGER.info('Tweeted "%s"', my_reply)
-    return
-
-  def on_error(self, status_code):
-    LOGGER.warning("Error")
-    LOGGER.error(status_code)
+    def on_error(self, status_code):
+        LOGGER.warning(u"Error")
+        LOGGER.error(status_code)
 
 
 def certify():
-  """
-  Authenticate with Twitter using Tweepy and return Twitter API object.
+    """Authenticate with Twitter using Tweepy and return Twitter API object.
 
-  :returns: Twitter API object
-  :rtype: Twitter API object
-  """
-  auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-  auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-  api = tweepy.API(auth)
-  return api
-
-
-def is_mention_or_reply_to_me(status):
-  """
-  Determine whether the tweet is a mention or a reply to me or not.
-
-  :param status: A tweet status
-  :type status: A tweet object
-  :returns: True if the tweet is a mention or a reply to me, otherwise False
-  :rtype: bool
-  """
-  try:
-    tweet_username = str(status.user.screen_name)
-    tweet_text = str(status.text.encode('utf_8'))
-
-    LOGGER.info('@%s: "%s"', tweet_username, tweet_text)
-
-    # If the tweet is a retweet, then skipped.
-    if "RT " in tweet_text:
-      LOGGER.info("-> Skipped (a retweet).")
-      return False
-
-    # If the tweet is neither a mention nor a reply, then skipped.
-    if status.in_reply_to_screen_name is None or "@" not in tweet_text or " " not in tweet_text:
-      LOGGER.info("-> Skipped (neither a mention nor a reply).")
-      return False
-
-    tweet_to = str(status.in_reply_to_screen_name)
-    tweet_id = status.id
-
-    # If the tweet is neither a mention nor a reply to me, then skipped.
-    if tweet_to != MY_TWITTER_USERNAME:
-      LOGGER.info("-> Skipped (neither a mention nor a reply to me).")
-      return False
-
-    return True
-
-  except Exception as e:
-    LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+    :returns: Twitter API object
+    :rtype: Twitter API object
+    """
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    return api
 
 
-if IS_TRAVIS_CI is True:
-  LOGGER.info("Travis CI build succeeded.")
-  sys.exit()
+def is_mention_or_reply_to_me(api, status):
+    """Determine whether the tweet is a mention or a reply to me or not.
 
-api = certify()
+    :param api: Twitter API object (required)
+    :type api: Twitter API obj
+    :param status: A tweet status (required)
+    :type status: A tweet object
+    :returns: True if the tweet is a mention or a reply to me, otherwise False
+    :rtype: bool
+    """
+    try:
+        tweet_username = status.user.screen_name
+        tweet_text = status.text
+        my_twitter_username = api.me().screen_name
 
-LOGGER.info("Authentication successful.")
+        LOGGER.info(u'@%s: "%s"', tweet_username, tweet_text)
 
-MY_TWITTER_USERNAME = str(api.me().screen_name)
-LOGGER.info("Hello @%s!", MY_TWITTER_USERNAME)
+        # If the tweet is a retweet, then skipped.
+        if u"RT " in tweet_text:
+            LOGGER.info(u"-> Skipped (a retweet).")
+            return False
 
-try:
-  MY_STREAM = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
+        # If the tweet is neither a mention nor a reply, then skipped.
+        if status.in_reply_to_screen_name is None or u"@" not in tweet_text \
+                or u" " not in tweet_text:
+            LOGGER.info(u"-> Skipped (neither a mention nor a reply).")
+            return False
 
-  LOGGER.info("Started streaming...")
+        tweet_to = status.in_reply_to_screen_name
 
-  MY_STREAM.userstream()
+        # If the tweet is neither a mention nor a reply to me, then skipped.
+        if tweet_to != my_twitter_username:
+            LOGGER.info(u"-> Skipped (neither a mention nor a reply to me).")
+            return False
 
-  LOGGER.info("Finished streaming.")
+        return True
 
-except Exception as e:
-  LOGGER.error("[line %s] %s", sys.exc_info()[-1].tb_lineno, e)
+    except Exception as e:
+        LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+
+
+def raise_exception_if_not_429_too_many_requests(e):
+    """If the error is not the 429 Too Many Requests error, raise an error.
+    Otherwise, passing.
+
+    :param Exception e: A handled exception when using Tweepy (required)
+    """
+    if e.find(u"429") == -1:
+        raise Exception(u"[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
+                                                 e))
+
+
+def search_tweets(api, query, max_tweets):
+    """Search the tweets that match a search query and return them.
+
+    :param api: Twitter API object (required)
+    :type api: Twitter API obj
+    :param unicode query: A search query (required)
+    :param int max_tweets: The maximum search results limit (required)
+    :returns: A list of SearchResult objects
+    :rtype: list of SearchResult obj
+
+    :Example:
+    >>> search_tweets(api=api, query=u"keyword", max_tweets=500)
+    """
+    query_encoded = urllib.quote_plus(query.encode("utf_8")).decode("utf_8")
+
+    while True:
+        try:
+            LOGGER.info(u'Searching "%s"...', query)
+
+            result = [status for status in tweepy.Cursor(
+                api.search, q=query_encoded, lang=u"ja").items(max_tweets)]
+
+            return result
+
+        except Exception as e:
+            # If the error is not the 429 Too Many Requests error, raise an
+            # error. Otherwise, retrying in 1 minute.
+            raise_exception_if_not_429_too_many_requests(e=e)
+
+            LOGGER.warning(u"429 Too Many Requests. Waiting 1 minute...")
+            time.sleep(60)
+
+
+def get_surfaces(word):
+    """Do morphological analysis using MeCab, and return list of surfaces.
+
+    :param unicode word: A word whose surfaces we want to know (required)
+    :return: list of surfaces
+    :rtype: list of unicode
+
+    :Example:
+    >>> query_surfaces = get_surfaces(query)
+    """
+    return [node.surface.decode("utf_8")
+            for node in MeCab().parse(word.encode("utf_8"), as_nodes=True)]
+
+
+class Frequencies:
+    """A class to generate a frequencies dict.
+
+    :Example:
+    >>> frequencies_obj = Frequencies()
+    >>> frequencies_obj.add(node)
+    >>> return frequencies_obj.dict
+    """
+    def __init__(self):
+        """A method to initialize a object."""
+        self.dict = defaultdict(int)
+
+    def add(self, node):
+        """Add text or its end-form to dict.
+
+        :param node: A MeCabNode instance (required)
+        :type node: MeCabNode instance obj
+        """
+        parts_of_speech = node.feature.decode("utf_8").split(u",")[0]
+        word = node.surface.decode("utf-8")
+        word_end_form = node.feature.decode("utf-8").split(u",")[6]
+
+        # If the word is adjective or verb, then add its end-form to dict.
+        if parts_of_speech == u"形容詞":
+            self.dict[word_end_form] += 100
+        elif parts_of_speech == u"動詞":
+            self.dict[word_end_form] += 1
+        elif parts_of_speech in [u"名詞", u"副詞"]:
+            self.dict[word] += 1
+
+
+def get_words_frequencies(words, stop_words):
+    """Do morphological analysis using MeCab, and return a defaultdict of words
+    frequencies.
+
+    :param words: A list of word (required)
+    :type words: list of unicode
+    :param stop_words: Stop words (required)
+    :type stop_words: list of unicode
+    :return: A defaultdict of words frequencies
+    :rtype: defaultdict
+
+    :Example:
+    >>> frequencies = get_words_frequencies(words=words, stop_words=stop_words)
+    """
+    LOGGER.info(u"Doing morphological analysis using MeCab...")
+
+    # Concatenate words with spaces
+    text = u" ".join(words)
+
+    frequencies_obj = Frequencies()
+
+    # Do morphological analysis using MeCab.
+    for node in MeCab().parse(text.encode("utf_8"), as_nodes=True):
+        # If the word is a stop word, then skipped.
+        if node.surface.decode("utf_8") in stop_words:
+            continue
+
+        frequencies_obj.add(node)
+
+    LOGGER.info(u"-> Done.")
+
+    return frequencies_obj.dict
+
+
+def reply(api, in_reply_to_status_id, status, filename=None):
+    """Reply with text, or with both text and an image
+
+    :param api: Twitter API object (required)
+    :type api: Twitter API object
+    :param int in_reply_to_status_id: The ID of an existing status that the
+                                      update is in reply to (required)
+    :param unicode status: The text of your status update (required)
+    :param unicode filename: The local path to image file to upload (optional)
+
+    :Example:
+
+    >>> reply(api=api, in_reply_to_status_id=in_reply_to_status_id,
+              status=u"text")
+    """
+    # Reply with text
+    if filename is None:
+        api.update_status(in_reply_to_status_id=in_reply_to_status_id,
+                          status=status)
+        LOGGER.info(u'-> Tweeted "%s"', status)
+
+    # Reply with both text and an image
+    else:
+        api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
+                              status=status, filename=filename)
+        LOGGER.info(u'-> Tweeted "%s"', status)
+
+    return
+
+
+def generate_wordcloud_image(frequencies, image_path):
+    """Generate a wordcloud image from a defaultdict of words frequencies.
+
+    :param defaultdict frequencies: A defaultdict of words frequencies
+                                    (required)
+    :param unicode image_path: The wordcloud image file path (required)
+
+    :Example:
+    >>> generate_wordcloud_image(frequencies=frequencies,
+                                 image_path=image_path)
+    """
+    font_path = u"rounded-mplus-1p-bold.ttf"
+
+    wordcloud = WordCloud(background_color=u"white", width=900, height=450,
+                          font_path=font_path, min_font_size=12)
+
+    LOGGER.info(u"Generating a wordcloud image...")
+
+    image = wordcloud.generate_from_frequencies(frequencies=frequencies)
+
+    image.to_file(filename=image_path)
+
+    LOGGER.info(u'-> Saved a wordcloud image to "%s"', image_path)
+
+
+def main():
+    if IS_TRAVIS_CI:
+        LOGGER.info(u"Travis CI build succeeded.")
+        sys.exit()
+
+    api = certify()
+
+    LOGGER.info(u"Authentication successful.")
+
+    my_twitter_username = api.me().screen_name
+    LOGGER.info(u"Hello @%s!", my_twitter_username)
+
+    try:
+        my_stream = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
+
+        LOGGER.info(u"Started streaming...")
+        my_stream.userstream()
+
+        LOGGER.info(u"Finished streaming.")
+
+    except Exception as e:
+        LOGGER.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+
+
+if __name__ == "__main__":
+    main()
