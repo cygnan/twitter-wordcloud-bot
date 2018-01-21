@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 backports.functools-lru-cache==1.4
-certifi==2017.11.5        # via requests
+certifi==2018.1.18        # via requests
 cffi==1.11.4              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
