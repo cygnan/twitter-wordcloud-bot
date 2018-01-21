@@ -10,7 +10,7 @@ cffi==1.11.4              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
 idna==2.6                 # via requests
-matplotlib==2.1.1
+matplotlib==2.1.2
 natto-py==0.8.0
 numpy==1.13.3             # via matplotlib, wordcloud
 oauthlib==2.0.6           # via requests-oauthlib
