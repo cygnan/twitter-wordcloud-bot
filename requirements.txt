@@ -14,7 +14,7 @@ matplotlib==2.1.2
 natto-py==0.8.0
 numpy==1.13.3             # via matplotlib, wordcloud
 oauthlib==2.0.6           # via requests-oauthlib
-olefile==0.44             # via pillow
+olefile==0.45.1             # via pillow
 pillow==5.0.0             # via wordcloud
 pycparser==2.18           # via cffi
 pyparsing==2.2.0          # via matplotlib
