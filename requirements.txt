@@ -11,7 +11,7 @@ chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
 idna==2.6                 # via requests
 matplotlib==2.1.2
-natto-py==0.8.0
+natto-py==0.9.0
 numpy==1.14.0             # via matplotlib, wordcloud
 oauthlib==2.0.6           # via requests-oauthlib
 olefile==0.45.1             # via pillow
