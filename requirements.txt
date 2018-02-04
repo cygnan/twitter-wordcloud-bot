@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-backports.functools-lru-cache==1.4
+backports.functools-lru-cache==1.5
 certifi==2018.1.18        # via requests
 cffi==1.11.4              # via natto-py
 chardet==3.0.4            # via requests
