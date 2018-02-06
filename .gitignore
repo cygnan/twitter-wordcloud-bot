@@ -6,3 +6,4 @@
 !/.cellar
 !/.pylintrc
 !/.hound.yml
+*.pyc
