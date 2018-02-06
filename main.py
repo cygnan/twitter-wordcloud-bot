@@ -16,79 +16,97 @@ from wordcloud_handler import generate_wordcloud_image
 matplotlib.use(u"Agg")
 
 
-class MyStreamListener(tweepy.StreamListener):
-    def on_status(self, status):
-        if not is_mention_or_reply_to_me(api=self.api, status=status):
+class TweetHandler:
+    def __init__(self, api, status):
+        try:
+            self.api = api
+            self.status = status
+            self.tweet_username = self.status.user.screen_name
+            self.tweet_text = self.status.text
+            self.tweet_id = self.status.id
+            self.query = self.tweet_text.split(u" ",
+                                               self.tweet_text.count(u"@"))[-1]
+
+        except Exception as e:
+            self.reply_error_message(e=e)
+
+    def process(self):
+        if not is_mention_or_reply_to_me(api=self.api, status=self.status):
             return
 
         try:
-            tweet_username = status.user.screen_name
-            tweet_text = status.text
-            tweet_id = status.id
-
-            query = tweet_text.split(u" ", tweet_text.count(u"@"))[-1]
-
-            searched_tweets = search_tweets(api=self.api, query=query,
+            searched_tweets = search_tweets(api=self.api, query=self.query,
                                             max_tweets=500)
-
-            logger.info(u"-> %d tweets were found.", len(searched_tweets))
 
             # If the search didn't match any tweets, then tweeting that.
             # Note: If len(searched_tweets) == 0, then searched_tweets returns
             # False.
             if not searched_tweets:
-                my_reply = u"@{0} Your search - {1} - did not match any twee" \
-                           u"ts. Try different keywords."\
-                    .format(tweet_username, query)
-
-                reply(api=self.api, in_reply_to_status_id=tweet_id,
-                      status=my_reply)
+                self.reply_no_results()
                 return
-
-            stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
-                          u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
-                          u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
-                          u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
-                          u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
-                          u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
-                          u"@", u"http", u"https", u".", u":", u"/", u"//",
-                          u"://"]
-
-            # Append the query itself to stop words.
-            query_surfaces = get_surfaces(query)
-            stop_words.extend(query_surfaces)
 
             # Create words list.
             words = [tweet.text for tweet in searched_tweets]
 
+            self.add_to_stop_words(self.query)
+
             # Do morphological analysis using MeCab, and create a defaultdict
             # of words frequencies.
             frequencies = get_words_frequencies(words=words,
-                                                stop_words=stop_words)
+                                                stop_words=self.stop_words)
 
-            image_path = u"/tmp/{0}.png".format(tweet_id)
+            image_path = u"/tmp/{0}.png".format(self.tweet_id)
 
             # Generate a wordcloud image.
             generate_wordcloud_image(frequencies=frequencies,
                                      image_path=image_path)
 
             my_reply = u'@{0} Search results for "{1}" (about {2} tweets)'\
-                .format(tweet_username, query, len(searched_tweets))
+                .format(self.tweet_username, self.query, len(searched_tweets))
 
             # Reply with the wordcloud image
-            reply(api=self.api, in_reply_to_status_id=tweet_id,
+            reply(api=self.api, in_reply_to_status_id=self.tweet_id,
                   status=my_reply, filename=image_path)
 
         except Exception as e:
-            logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+            self.reply_error_message(e=e)
 
-            my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
-                       u"went wrong.".format(tweet_username)
+    def add_to_stop_words(self, words):
+        self.stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
+                           u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
+                           u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
+                           u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
+                           u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
+                           u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
+                           u"@", u"http", u"https", u".", u":", u"/", u"//",
+                           u"://"]
 
-            reply(api=self.api, in_reply_to_status_id=tweet_id,
-                  status=my_reply)
+        # Append the query itself to stop words.
+        query_surfaces = get_surfaces(words)
+        self.stop_words.extend(query_surfaces)
 
-        return
+    def reply_no_results(self):
+        my_reply = u"@{0} Your search - {1} - did not match any twee" \
+                   u"ts. Try different keywords." \
+            .format(self.tweet_username, self.query)
+
+        reply(api=self.api, in_reply_to_status_id=self.tweet_id,
+              status=my_reply)
+
+    def reply_error_message(self, e):
+        logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+
+        my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
+                   u"went wrong.".format(self.tweet_username)
+
+        reply(api=self.api, in_reply_to_status_id=self.tweet_id,
+              status=my_reply)
+
+
+class MyStreamListener(tweepy.StreamListener):
+    def on_status(self, status):
+        tweet_handler = TweetHandler(api=self.api, status=status)
+        tweet_handler.process()
 
     def on_error(self, status_code):
         logger.warning(u"Error")

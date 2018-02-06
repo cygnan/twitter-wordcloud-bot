@@ -52,13 +52,13 @@ class Frequencies:
             self.dict[word] += 1
 
 
-def get_words_frequencies(words, stop_words):
+def get_words_frequencies(words, stop_words=None):
     """Do morphological analysis using MeCab, and return a defaultdict of words
     frequencies.
 
     :param words: A list of word (required)
     :type words: list of unicode
-    :param stop_words: Stop words (required)
+    :param stop_words: Stop words (optional)
     :type stop_words: list of unicode
     :return: A defaultdict of words frequencies
     :rtype: defaultdict
@@ -67,6 +67,14 @@ def get_words_frequencies(words, stop_words):
     >>> frequencies = get_words_frequencies(words=words, stop_words=stop_words)
     """
     logger.info(u"Doing morphological analysis using MeCab...")
+
+    if stop_words is None:
+        stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
+                      u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
+                      u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
+                      u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
+                      u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
+                      u"も", u"な", u"い", u"か", u"ので", u"よう", u""]
 
     # Concatenate words with spaces
     text = u" ".join(words)
