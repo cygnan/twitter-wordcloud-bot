@@ -97,10 +97,12 @@ def search_tweets(api, query, max_tweets):
         try:
             logger.info(u'Searching "%s"...', query)
 
-            result = [status for status in tweepy.Cursor(
+            searched_tweets = [status for status in tweepy.Cursor(
                 api.search, q=query_encoded, lang=u"ja").items(max_tweets)]
 
-            return result
+            logger.info(u"-> %d tweets were found.", len(searched_tweets))
+
+            return searched_tweets
 
         except Exception as e:
             # If the error is not the 429 Too Many Requests error, raise an
