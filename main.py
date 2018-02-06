@@ -7,8 +7,10 @@ import matplotlib
 import tweepy
 
 from logger import logger
+from mecab import get_surfaces, get_words_frequencies
 from tweepy_handler import certify, is_mention_or_reply_to_me, search_tweets, \
     reply
+from wordcloud_handler import generate_wordcloud_image
 
 # Set the filetype to png
 matplotlib.use(u"Agg")
