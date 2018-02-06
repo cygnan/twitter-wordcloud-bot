@@ -299,7 +299,7 @@ def reply(api, in_reply_to_status_id, status, filename=None):
     :Example:
 
     >>> reply(api=api, in_reply_to_status_id=in_reply_to_status_id,
-              status=u"text")
+    >>>       status=u"text")
     """
     # Reply with text
     if filename is None:
@@ -325,7 +325,7 @@ def generate_wordcloud_image(frequencies, image_path):
 
     :Example:
     >>> generate_wordcloud_image(frequencies=frequencies,
-                                 image_path=image_path)
+    >>>                          image_path=image_path)
     """
     font_path = u"rounded-mplus-1p-bold.ttf"
 
