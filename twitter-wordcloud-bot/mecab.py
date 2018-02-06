@@ -69,12 +69,12 @@ def get_words_frequencies(words, stop_words=None):
     logger.info(u"Doing morphological analysis using MeCab...")
 
     if stop_words is None:
-        stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
-                      u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
-                      u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
-                      u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
-                      u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
-                      u"も", u"な", u"い", u"か", u"ので", u"よう", u""]
+        stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある", u"こと",
+                      u"これ", u"さん", u"して", u"くれる", u"やる", u"くださる",
+                      u"そう", u"せる", u"した", u"思う", u"それ", u"ここ", u"ちゃん",
+                      u"くん", u"", u"て", u"に", u"を", u"は", u"の", u"が",
+                      u"と", u"た", u"し", u"で", u"ない", u"も", u"な", u"い",
+                      u"か", u"ので", u"よう", u""]
 
     # Concatenate words with spaces
     text = u" ".join(words)

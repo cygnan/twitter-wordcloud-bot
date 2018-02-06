@@ -18,6 +18,15 @@ matplotlib.use(u"Agg")
 
 class TweetHandler:
     def __init__(self, api, status):
+        self.stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
+                           u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
+                           u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
+                           u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
+                           u"は", u"の", u"が", u"と", u"た", u"し", u"で",
+                           u"ない", u"も", u"な", u"い", u"か", u"ので", u"よう",
+                           u"", u"RT", u"@", u"http", u"https", u".", u":",
+                           u"/", u"//", u"://"]
+
         try:
             self.api = api
             self.status = status
@@ -72,22 +81,14 @@ class TweetHandler:
             self.reply_error_message(e=e)
 
     def add_to_stop_words(self, words):
-        self.stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
-                           u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
-                           u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
-                           u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
-                           u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
-                           u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
-                           u"@", u"http", u"https", u".", u":", u"/", u"//",
-                           u"://"]
-
         # Append the query itself to stop words.
         query_surfaces = get_surfaces(words)
+
         self.stop_words.extend(query_surfaces)
 
     def reply_no_results(self):
-        my_reply = u"@{0} Your search - {1} - did not match any twee" \
-                   u"ts. Try different keywords." \
+        my_reply = u"@{0} Your search - {1} - did not match any tweets. Try " \
+                   u"different keywords." \
             .format(self.tweet_username, self.query)
 
         reply(api=self.api, in_reply_to_status_id=self.tweet_id,
@@ -96,8 +97,8 @@ class TweetHandler:
     def reply_error_message(self, e):
         logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
-        my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
-                   u"went wrong.".format(self.tweet_username)
+        my_reply = u"@{0} 500 Internal Server Error. Sorry, something went " \
+                   u"wrong.".format(self.tweet_username)
 
         reply(api=self.api, in_reply_to_status_id=self.tweet_id,
               status=my_reply)
