@@ -56,7 +56,10 @@ class TweetHandler:
             # Create words list.
             words = [tweet.text for tweet in searched_tweets]
 
-            self.add_to_stop_words(self.query)
+            # Append the query itself to stop words.
+            query_surfaces = get_surfaces(self.query)
+
+            self.stop_words.extend(query_surfaces)
 
             # Do morphological analysis using MeCab, and create a defaultdict
             # of words frequencies.
@@ -78,12 +81,6 @@ class TweetHandler:
 
         except Exception as e:
             self.reply_error_message(e=e)
-
-    def add_to_stop_words(self, words):
-        # Append the query itself to stop words.
-        query_surfaces = get_surfaces(words)
-
-        self.stop_words.extend(query_surfaces)
 
     def reply_no_results(self):
         my_reply = u"@{0} Your search - {1} - did not match any tweets. Try " \
