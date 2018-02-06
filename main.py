@@ -354,7 +354,8 @@ def main():
     LOGGER.info(u"Hello @%s!", my_twitter_username)
 
     try:
-        my_stream = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
+        my_stream_listener = MyStreamListener(api=api)
+        my_stream = tweepy.Stream(auth=api.auth, listener=my_stream_listener)
 
         LOGGER.info(u"Started streaming...")
         my_stream.userstream()
