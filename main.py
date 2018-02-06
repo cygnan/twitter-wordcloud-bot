@@ -45,26 +45,15 @@ class TweetHandler:
                 self.reply_no_results()
                 return
 
-            stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
-                          u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
-                          u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
-                          u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
-                          u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
-                          u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
-                          u"@", u"http", u"https", u".", u":", u"/", u"//",
-                          u"://"]
-
-            # Append the query itself to stop words.
-            query_surfaces = get_surfaces(self.query)
-            stop_words.extend(query_surfaces)
-
             # Create words list.
             words = [tweet.text for tweet in searched_tweets]
+
+            self.add_to_stop_words(self.query)
 
             # Do morphological analysis using MeCab, and create a defaultdict
             # of words frequencies.
             frequencies = get_words_frequencies(words=words,
-                                                stop_words=stop_words)
+                                                stop_words=self.stop_words)
 
             image_path = u"/tmp/{0}.png".format(self.tweet_id)
 
@@ -81,6 +70,20 @@ class TweetHandler:
 
         except Exception as e:
             self.reply_error_message(e=e)
+
+    def add_to_stop_words(self, words):
+        self.stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
+                           u"こと", u"これ", u"さん", u"して", u"くれる", u"やる",
+                           u"くださる", u"そう", u"せる", u"した", u"思う", u"それ",
+                           u"ここ", u"ちゃん", u"くん", u"", u"て", u"に", u"を",
+                           u"は", u"の", u"が", u"と", u"た", u"し", u"で", u"ない",
+                           u"も", u"な", u"い", u"か", u"ので", u"よう", u"", u"RT",
+                           u"@", u"http", u"https", u".", u":", u"/", u"//",
+                           u"://"]
+
+        # Append the query itself to stop words.
+        query_surfaces = get_surfaces(words)
+        self.stop_words.extend(query_surfaces)
 
     def reply_no_results(self):
         my_reply = u"@{0} Your search - {1} - did not match any twee" \
