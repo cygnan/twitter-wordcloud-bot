@@ -29,7 +29,8 @@ class TweetHandler:
             return
 
         try:
-            query = self.tweet_text.split(u" ", self.tweet_text.count(u"@"))[-1]
+            query = self.tweet_text.split(u" ",
+                                          self.tweet_text.count(u"@"))[-1]
 
             searched_tweets = search_tweets(api=self.api, query=query,
                                             max_tweets=500)
