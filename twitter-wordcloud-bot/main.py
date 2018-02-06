@@ -8,7 +8,7 @@ import tweepy
 
 from logger import logger
 from mecab import get_surfaces, get_words_frequencies
-from tweepy_handler import *
+from tweepy_handler import *  # noqa
 from wordcloud_handler import generate_wordcloud_image
 
 # Set the filetype to png
