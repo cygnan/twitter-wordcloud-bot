@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__all__ = [u"certify", u"is_mention_or_reply_to_me", u"search_tweets",
-           u"reply"]
-
 import sys
 import urllib
 
@@ -13,6 +10,10 @@ import os
 import tweepy
 
 from logger import logger
+
+
+__all__ = [u"certify", u"is_mention_or_reply_to_me", u"search_tweets",
+           u"reply"]
 
 
 def certify():
