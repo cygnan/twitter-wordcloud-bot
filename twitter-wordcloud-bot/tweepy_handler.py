@@ -139,5 +139,3 @@ def reply(api, in_reply_to_status_id, status, filename=None):
         api.update_with_media(in_reply_to_status_id=in_reply_to_status_id,
                               status=status, filename=filename)
         logger.info(u'-> Tweeted "%s"', status)
-
-    return
