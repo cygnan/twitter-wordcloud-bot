@@ -18,33 +18,31 @@ matplotlib.use(u"Agg")
 
 class TweetHandler:
     def __init__(self, api, status):
-        self.api = api
-        self.status = status
-        self.tweet_username = self.status.user.screen_name
-        self.tweet_text = self.status.text
-        self.tweet_id = self.status.id
+        try:
+            self.api = api
+            self.status = status
+            self.tweet_username = self.status.user.screen_name
+            self.tweet_text = self.status.text
+            self.tweet_id = self.status.id
+            self.query = self.tweet_text.split(u" ",
+                                               self.tweet_text.count(u"@"))[-1]
+
+        except Exception as e:
+            self.reply_error_message(e=e)
 
     def process(self):
         if not is_mention_or_reply_to_me(api=self.api, status=self.status):
             return
 
         try:
-            query = self.tweet_text.split(u" ",
-                                          self.tweet_text.count(u"@"))[-1]
-
-            searched_tweets = search_tweets(api=self.api, query=query,
+            searched_tweets = search_tweets(api=self.api, query=self.query,
                                             max_tweets=500)
 
             # If the search didn't match any tweets, then tweeting that.
             # Note: If len(searched_tweets) == 0, then searched_tweets returns
             # False.
             if not searched_tweets:
-                my_reply = u"@{0} Your search - {1} - did not match any twee" \
-                           u"ts. Try different keywords."\
-                    .format(self.tweet_username, query)
-
-                reply(api=self.api, in_reply_to_status_id=self.tweet_id,
-                      status=my_reply)
+                self.reply_no_results()
                 return
 
             stop_words = [u"てる", u"いる", u"なる", u"れる", u"する", u"ある",
@@ -57,7 +55,7 @@ class TweetHandler:
                           u"://"]
 
             # Append the query itself to stop words.
-            query_surfaces = get_surfaces(query)
+            query_surfaces = get_surfaces(self.query)
             stop_words.extend(query_surfaces)
 
             # Create words list.
@@ -75,16 +73,24 @@ class TweetHandler:
                                      image_path=image_path)
 
             my_reply = u'@{0} Search results for "{1}" (about {2} tweets)'\
-                .format(self.tweet_username, query, len(searched_tweets))
+                .format(self.tweet_username, self.query, len(searched_tweets))
 
             # Reply with the wordcloud image
             reply(api=self.api, in_reply_to_status_id=self.tweet_id,
                   status=my_reply, filename=image_path)
 
         except Exception as e:
-            self.handle_exception(e=e)
+            self.reply_error_message(e=e)
 
-    def handle_exception(self, e):
+    def reply_no_results(self):
+        my_reply = u"@{0} Your search - {1} - did not match any twee" \
+                   u"ts. Try different keywords." \
+            .format(self.tweet_username, self.query)
+
+        reply(api=self.api, in_reply_to_status_id=self.tweet_id,
+              status=my_reply)
+
+    def reply_error_message(self, e):
         logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
 
         my_reply = u"@{0} 500 Internal Server Error. Sorry, something " \
