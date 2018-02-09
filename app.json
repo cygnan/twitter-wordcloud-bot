@@ -2,20 +2,47 @@
   "name": "twitter-wordcloud-bot",
   "description": "A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.",
   "keywords": [
-    "python"
+    "heroku",
+    "twitter-bot",
+    "wordcloud",
+    "tweepy",
+    "mecab",
+    "python",
+    "twitter"
   ],
+  "website": "https://github.com/cygnan/twitter-wordcloud-bot",
+  "repository": "https://github.com/cygnan/twitter-wordcloud-bot",
   "env": {
     "CONSUMER_KEY": {
-      "description": "Twitter Consumer Key"
+      "description": "Your Twitter Consumer Key"
     },
     "CONSUMER_SECRET": {
-      "description": "Twitter Consumer Secret"
+      "description": "Your Twitter Consumer Secret"
     },
     "ACCESS_TOKEN": {
-      "description": "Twitter Access Token"
+      "description": "Your Twitter Access Token"
     },
     "ACCESS_TOKEN_SECRET": {
-      "description": "Twitter Access Token Secret"
+      "description": "Your Twitter Access Token Secret"
+    },
+    "LD_LIBRARY_PATH": {
+      "description": "The path to your libraries (no need to edit this)",
+      "value": "/app/.linuxbrew/lib"
+    },
+    "MECAB_PATH": {
+      "description": "The path to your MeCab library (no need to edit this)",
+      "value": "/app/.linuxbrew/lib/libmecab.so"
     }
-  }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-multi"
+    }
+  ]
 }
