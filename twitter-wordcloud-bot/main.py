@@ -24,7 +24,7 @@ class TweetHandler:
                            u"は", u"の", u"が", u"と", u"た", u"し", u"で",
                            u"ない", u"も", u"な", u"い", u"か", u"ので", u"よう",
                            u"", u"RT", u"@", u"http", u"https", u".", u":",
-                           u"/", u"//", u"://"]
+                           u"/", u"//", u"://", u"t", u"co"]
 
         try:
             self.api = api
