@@ -91,7 +91,7 @@ class TweetHandler:
               status=my_reply)
 
     def reply_error_message(self, e):
-        logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+        logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, repr(e))
 
         my_reply = u"@{0} 500 Internal Server Error. Sorry, something went " \
                    u"wrong.".format(self.tweet_username)
@@ -132,7 +132,7 @@ def main():
         logger.info(u"Finished streaming.")
 
     except Exception as e:
-        logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, e)
+        logger.error(u"[line %d] %s", sys.exc_info()[-1].tb_lineno, repr(e))
 
 
 if __name__ == "__main__":
