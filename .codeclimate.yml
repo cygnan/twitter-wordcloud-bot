@@ -1,21 +1,19 @@
-engines:
+version: "2"
+
+plugins:
   pep8:
     enabled: true
 
   radon: 
     enabled: false
-  
+
   duplication:
     enabled: true
     config:
       languages:
       - python:
 
-ratings:
-   paths:
-   - "**.py"
-
-exclude_paths:
+exclude_patterns:
 - "Procfile"
 - "*.md"
 - "*.txt"
