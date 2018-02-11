@@ -80,7 +80,7 @@ def raise_exception_if_not_429_too_many_requests(e):
 
     :param Exception e: A handled exception when using Tweepy (required)
     """
-    if e.find(u"429") == -1:
+    if repr(e).find(u"429") == -1:
         raise Exception(u"[line {0}] {1}".format(sys.exc_info()[-1].tb_lineno,
                                                  e))
 
