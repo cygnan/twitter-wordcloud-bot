@@ -5,6 +5,8 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 backports.functools-lru-cache==1.5
+backports.tempfile==1.0
+backports.weakref==1.0.post1  # via backports.tempfile
 certifi==2018.1.18        # via requests
 cffi==1.11.4              # via natto-py
 chardet==3.0.4            # via requests
@@ -14,7 +16,6 @@ matplotlib==2.1.2
 natto-py==0.9.0
 numpy==1.14.0             # via matplotlib, wordcloud
 oauthlib==2.0.6           # via requests-oauthlib
-olefile==0.45.1             # via pillow
 pillow==5.0.0             # via wordcloud
 pycparser==2.18           # via cffi
 pyparsing==2.2.0          # via matplotlib

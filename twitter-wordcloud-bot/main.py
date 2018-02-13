@@ -4,7 +4,9 @@
 import sys
 
 import matplotlib
+import os
 import tweepy
+import backports.tempfile as tempfile
 
 from logger import logger
 from mecab_handler import get_surfaces, get_words_frequencies
@@ -66,7 +68,9 @@ class TweetHandler:
             frequencies = get_words_frequencies(words=words,
                                                 stop_words=self.stop_words)
 
-            image_path = u"/tmp/{0}.png".format(self.tweet_id)
+            self.temp_dir = self.get_unique_temp_dir()
+
+            image_path = os.path.join(self.temp_dir.name, u"image.png")
 
             # Generate a wordcloud image.
             generate_wordcloud_image(frequencies=frequencies,
@@ -79,8 +83,13 @@ class TweetHandler:
             reply(api=self.api, in_reply_to_status_id=self.tweet_id,
                   status=my_reply, filename=image_path)
 
+            self.temp_dir.cleanup()
+
         except Exception as e:
             self.reply_error_message(e=e)
+
+    def get_unique_temp_dir(self):
+        return tempfile.TemporaryDirectory()
 
     def reply_no_results(self):
         my_reply = u"@{0} Your search - {1} - did not match any tweets. Try " \
