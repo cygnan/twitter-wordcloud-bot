@@ -17,7 +17,7 @@ def generate_wordcloud_image(frequencies, image_path):
     >>> generate_wordcloud_image(frequencies=frequencies,
     >>>                          image_path=image_path)
     """
-    font_path = u"rounded-mplus-1p-bold.ttf"
+    font_path = u"font/rounded-mplus-1p-bold.ttf"
 
     wordcloud = WordCloud(background_color=u"white", width=900, height=450,
                           font_path=font_path, min_font_size=12)
