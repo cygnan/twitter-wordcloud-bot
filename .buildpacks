@@ -1,2 +1,4 @@
 https://github.com/cygnan/heroku-buildpack-linuxbrew.git
+https://github.com/cygnan/heroku-buildpack-mecab-ipadic-neologd.git
+https://github.com/cygnan/heroku-buildpack-run.git
 https://github.com/heroku/heroku-buildpack-python.git
