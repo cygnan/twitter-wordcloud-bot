@@ -1,6 +1,6 @@
 {
   "name": "twitter-wordcloud-bot",
-  "description": "A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.",
+  "description": "A Twitter bot to know the query's rating at a glance on Twitter visualizely.",
   "keywords": [
     "heroku",
     "twitter-bot",
