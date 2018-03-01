@@ -4,17 +4,23 @@
 [![Updates](https://pyup.io/repos/github/cygnan/twitter-wordcloud-bot/shield.svg)](https://pyup.io/repos/github/cygnan/twitter-wordcloud-bot/)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6302b1e5c142245d7d6a/maintainability)](https://codeclimate.com/github/cygnan/twitter-wordcloud-bot/maintainability)
 [![Hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)](https://houndci.com)
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-A Twitter bot with Python and Heroku to generate a wordcloud from the tweets that match a search query.
+A Twitter bot to know the query's rating at a glance on Twitter visualizely.
 
 ## Requirements
 
 - A free Heroku account (No credit card required)
-- Heroku CLI
 - A Twitter account
 
 ## How to deploy to Heroku
+
+### Use a "Deploy to Heroku" Button
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
+You can get Twitter API keys and tokens from [https://apps.twitter.com/app/new](https://apps.twitter.com/app/new).
+
+### Manual setup
 
 1. Clone this repository
 
@@ -32,9 +38,9 @@ A Twitter bot with Python and Heroku to generate a wordcloud from the tweets tha
    heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi
    ```
 
-   __Note:__ Choose an unique app name for `{APP_NAME}`.
+   __Note:__ [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) needed. Choose an unique app name for `{APP_NAME}`.
 
-1. Get your Twitter API keys and tokens and set them.
+1. Get your Twitter API keys and tokens, and set them.
 
    ```bash
    heroku config:set CONSUMER_KEY={YOUR_CONSUMER_KEY}
