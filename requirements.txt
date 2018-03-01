@@ -4,22 +4,23 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-backports.functools-lru-cache==1.4
-certifi==2017.11.5        # via requests
-cffi==1.11.4              # via natto-py
+backports.functools-lru-cache==1.5
+backports.tempfile==1.0
+backports.weakref==1.0.post1  # via backports.tempfile
+certifi==2018.1.18        # via requests
+cffi==1.11.5              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
 idna==2.6                 # via requests
-matplotlib==2.1.1
-natto-py==0.8.0
-numpy==1.13.3             # via matplotlib, wordcloud
+matplotlib==2.1.2
+natto-py==0.9.0
+numpy==1.14.1             # via matplotlib, wordcloud
 oauthlib==2.0.6           # via requests-oauthlib
-olefile==0.44             # via pillow
 pillow==5.0.0             # via wordcloud
 pycparser==2.18           # via cffi
 pyparsing==2.2.0          # via matplotlib
 python-dateutil==2.6.1    # via matplotlib
-pytz==2017.3              # via matplotlib
+pytz==2018.3              # via matplotlib
 requests-oauthlib==0.8.0  # via tweepy
 requests==2.18.4          # via requests-oauthlib, tweepy
 six==1.11.0               # via cycler, matplotlib, python-dateutil, tweepy
