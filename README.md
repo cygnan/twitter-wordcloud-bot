@@ -14,7 +14,7 @@ A Twitter bot to know the query's rating at a glance on Twitter visualizely.
 
 ## How to deploy to Heroku
 
-### Use a "Deploy to Heroku" Button
+### Use a "Deploy to Heroku" button
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
