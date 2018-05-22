@@ -15,7 +15,7 @@ idna==2.6                 # via requests
 matplotlib==2.2.2         # via wordcloud
 natto-py==0.9.0
 numpy==1.14.3             # via matplotlib, wordcloud
-oauthlib==2.0.7           # via requests-oauthlib
+oauthlib==2.1.0           # via requests-oauthlib
 pillow==5.1.0             # via wordcloud
 pycparser==2.18           # via cffi
 pyparsing==2.2.0          # via matplotlib
