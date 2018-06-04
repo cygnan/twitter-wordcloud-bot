@@ -21,7 +21,7 @@ pycparser==2.18           # via cffi
 pyparsing==2.2.0          # via matplotlib
 python-dateutil==2.7.3    # via matplotlib
 pytz==2018.4              # via matplotlib
-requests-oauthlib==0.8.0  # via tweepy
+requests-oauthlib==1.0.0  # via tweepy
 requests==2.18.4          # via requests-oauthlib, tweepy
 six==1.11.0               # via cycler, matplotlib, python-dateutil, tweepy
 tweepy==3.6.0
