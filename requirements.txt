@@ -11,7 +11,7 @@ certifi==2018.11.29        # via requests
 cffi==1.11.5              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
-idna==2.7                 # via requests
+idna==2.8                 # via requests
 matplotlib==2.2.3         # via wordcloud
 natto-py==0.9.0
 numpy==1.15.4             # via matplotlib, wordcloud
