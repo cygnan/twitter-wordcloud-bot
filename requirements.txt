@@ -23,7 +23,7 @@ python-dateutil==2.7.5    # via matplotlib
 pytz==2018.7              # via matplotlib
 requests-oauthlib==1.0.0  # via tweepy
 requests==2.20.1          # via requests-oauthlib, tweepy
-six==1.11.0               # via cycler, matplotlib, python-dateutil, tweepy
+six==1.12.0               # via cycler, matplotlib, python-dateutil, tweepy
 tweepy==3.6.0
 urllib3==1.24.1             # via requests
 wordcloud==1.4.1
