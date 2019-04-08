@@ -18,7 +18,7 @@ numpy==1.16.2             # via matplotlib, wordcloud
 oauthlib==3.0.1           # via requests-oauthlib
 pillow==6.0.0             # via wordcloud
 pycparser==2.19           # via cffi
-pyparsing==2.3.1          # via matplotlib
+pyparsing==2.4.0          # via matplotlib
 python-dateutil==2.8.0    # via matplotlib
 pytz==2018.9              # via matplotlib
 requests-oauthlib==1.2.0  # via tweepy
