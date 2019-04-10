@@ -20,7 +20,7 @@ pillow==6.0.0             # via wordcloud
 pycparser==2.19           # via cffi
 pyparsing==2.4.0          # via matplotlib
 python-dateutil==2.8.0    # via matplotlib
-pytz==2018.9              # via matplotlib
+pytz==2019.1              # via matplotlib
 requests-oauthlib==1.2.0  # via tweepy
 requests==2.21.0          # via requests-oauthlib, tweepy
 six==1.12.0               # via cycler, matplotlib, python-dateutil, tweepy
