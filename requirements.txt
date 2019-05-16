@@ -22,7 +22,7 @@ pyparsing==2.4.0          # via matplotlib
 python-dateutil==2.8.0    # via matplotlib
 pytz==2019.1              # via matplotlib
 requests-oauthlib==1.2.0  # via tweepy
-requests==2.21.0          # via requests-oauthlib, tweepy
+requests==2.22.0          # via requests-oauthlib, tweepy
 six==1.12.0               # via cycler, matplotlib, python-dateutil, tweepy
 tweepy==3.6.0
 urllib3==1.25.2             # via requests
