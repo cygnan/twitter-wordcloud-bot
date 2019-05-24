@@ -25,5 +25,5 @@ requests-oauthlib==1.2.0  # via tweepy
 requests==2.22.0          # via requests-oauthlib, tweepy
 six==1.12.0               # via cycler, matplotlib, python-dateutil, tweepy
 tweepy==3.6.0
-urllib3==1.25.2             # via requests
+urllib3==1.25.3             # via requests
 wordcloud==1.4.1
