@@ -7,7 +7,7 @@
 backports.functools-lru-cache==1.5
 backports.tempfile==1.0
 backports.weakref==1.0.post1  # via backports.tempfile
-certifi==2019.3.9        # via requests
+certifi==2019.6.16        # via requests
 cffi==1.12.3              # via natto-py
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
