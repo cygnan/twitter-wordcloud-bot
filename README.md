@@ -11,8 +11,7 @@ A Twitter bot to know the query's rating at a glance on Twitter visualizely.
   <img src="https://user-images.githubusercontent.com/25865313/234809938-df815e21-ca6d-460c-ac92-27929c752d31.JPG" width="600">
 </p>
 
-
-**Usage:** Tweet a search query to @twiwordcloudbot. Then it will search tweets and reply with a wordcloud image.
+**Usage:** Tweet a search query to [@twiwordcloudbot](https://twitter.com/twiwordcloudbot). Then the bot will search tweets and reply with a wordcloud image.
 
 ## Dependent libraries
 
