@@ -7,7 +7,9 @@
 
 A Twitter bot to know the query's rating at a glance on Twitter visualizely.
 
-<img src="https://user-images.githubusercontent.com/25865313/234809938-df815e21-ca6d-460c-ac92-27929c752d31.JPG" width="600">
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/25865313/234809938-df815e21-ca6d-460c-ac92-27929c752d31.JPG" width="600">
+</p>
 
 ## Requirements
 
