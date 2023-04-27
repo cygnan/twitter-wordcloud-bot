@@ -11,26 +11,33 @@ A Twitter bot to know the query's rating at a glance on Twitter visualizely.
   <img src="https://user-images.githubusercontent.com/25865313/234809938-df815e21-ca6d-460c-ac92-27929c752d31.JPG" width="600">
 </p>
 
-## Dependency
+
+## Usage
+
+Tweet a search query to @twiwordcloudbot. Then it will search tweets and reply with a wordcloud image.
+
+## Dependent libraries
 
 - MeCab
 - tweepy
 - [word_cloud](https://github.com/amueller/word_cloud)
 
-## Requirements
+## How to deploy
+
+### Requirements
 
 - A free Heroku account (No credit card required)
 - A Twitter account
 
-## How to deploy to Heroku
+### How to deploy to Heroku
 
-### Using a "Deploy to Heroku" button
+#### Using a "Deploy to Heroku" button
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 You can get Twitter API keys and tokens from [https://apps.twitter.com/app/new](https://apps.twitter.com/app/new).
 
-### Manual setup
+#### Manual setup
 
 1. Clone this repository
 
@@ -67,10 +74,6 @@ You can get Twitter API keys and tokens from [https://apps.twitter.com/app/new](
    git push heroku master
    heroku ps:scale worker=1
    ```
-
-## Usage
-
-Tweet a search query to your Twitter bot. Then it will search tweets and reply with a wordcloud image.
 
 ## License
 
